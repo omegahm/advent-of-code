@@ -3,12 +3,11 @@ data = "1101,1,29,67,1102,0,1,65,1008,65,35,66,1005,66,28,1,67,65,20,4,0,1001,65
 
 data = data.split(',').map(&:to_i)
 
-results = []
-
-(0..data.max).each do |pos|
-  results << data.reduce(0) do |acc, num|
+result = (0..data.max).flat_map do |pos|
+  data.reduce(0) do |acc, num|
     n = (num - pos).abs
     acc += n * (n + 1) / 2
   end
-end
-puts results.min
+end.min
+
+puts result
