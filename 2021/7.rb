@@ -5,11 +5,10 @@ data = data.split(',').map(&:to_i)
 
 results = []
 
-(0..data.max).each_with_index do |pos, idx|
-  results[idx] = []
-  data.each do |num|
+(0..data.max).each do |pos|
+  results << data.reduce(0) do |acc, num|
     n = (num - pos).abs
-    results[idx] << n * (n + 1) / 2
+    acc += n * (n + 1) / 2
   end
 end
-puts results.map(&:sum).min
+puts results.min
