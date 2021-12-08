@@ -222,119 +222,65 @@ HERE
 # e    f
 #  gggg
 
-result = 0
-data.lines.each do |line|
-  first, second = line.chomp.split(' | ')
-  second.split(' ').each do |word|
-    result += 1 if [2, 3, 4, 7].include?(word.size)
-  end
+lines = data.gsub(' | ', ' ').lines
+
+# PART 1
+result = lines.sum do |line|
+  line.split(' ').last(4).select do |word|
+    [2, 3, 4, 7].include?(word.size)
+  end.count
 end
 puts result
 
-# We know 1, 4, 7, 8
-# The difference between the one with two and three segments lit is `a`
-# The one with 5 lit that shares two with 4 and shares 2 with 1, is 3
-# We now know 1, 3, 4, 7, 8
-# The one with six lit that shares four with 4 is 9.
-# The one with six lit that shares three with 4 and 2 with 1 is 0.
-# We now know 0, 1, 3, 4, 7, 8, 9
-# The one with 5 that shares everything with 9 is 5
-# The one with 5 that shares 4 with 9 is 2
-# The last one is 6
+# PART 2
+result = lines.sum do |line|
+  displays = []
 
-require 'set'
-result = 0
-data.lines.each do |line|
-  displays = [nil] * 10
-  end_of_line = line.chomp.split(' | ').last.split(' ').map { |d| Set.new(d.chars.sort) }
-  randomized_displays = line.chomp.split(' | ').join(' ').split(' ').map { |d| Set.new(d.chars.sort) }.uniq.sort_by(&:size)
-  randomized_displays.each do |di|
-    if di.size == 2
+  parts = line.chomp.split(' ').map { |l| l.chars.sort }
+  randomized_displays = parts.first(10)
+
+  # We know 1, 4, 7, 8
+  randomized_displays.reject! do |di|
+    case di.size
+    when 2
       displays[1] = di
-      # puts "Found 1"
-      randomized_displays.delete(di)
-      break
-    end
-  end
-
-  randomized_displays.each do |di|
-    if di.size == 4
+    when 4
       displays[4] = di
-      # puts "Found 4"
-      randomized_displays.delete(di)
-      break
-    end
-  end
-
-  randomized_displays.each do |di|
-    if di.size == 3
+    when 3
       displays[7] = di
-      # puts "Found 7"
-      randomized_displays.delete(di)
-      break
-    end
-  end
-
-  randomized_displays.each do |di|
-    if di.size == 7
+    when 7
       displays[8] = di
-      # puts "Found 8"
-      randomized_displays.delete(di)
-      break
     end
   end
 
-  randomized_displays.each do |di|
-    if di.size == 5 && (di & displays[4]).size == 3 && (di & displays[1]).size == 2
-      displays[3] = di
-      # puts "Found 3"
-      randomized_displays.delete(di)
-      break
-    end
+  # The one with five lit that shares two with 4 and shares two with 1 is 3
+  randomized_displays.reject! do |di|
+    displays[3] = di if di.size == 5 && (di & displays[4]).size == 3 && (di & displays[1]).size == 2
   end
 
-  randomized_displays.each do |di|
-    if di.size == 6 && (di & displays[4]).size == 4
-      displays[9] = di
-      # puts "Found 9"
-      randomized_displays.delete(di)
-      break
-    end
+  # The one with six lit that shares four with 4 is 9.
+  randomized_displays.reject! do |di|
+    displays[9] = di if di.size == 6 && (di & displays[4]).size == 4
   end
 
-  randomized_displays.each do |di|
-    if di.size == 6 && (di & displays[4]).size == 3 && (di & displays[1]).size == 2
-      displays[0] = di
-      # puts "Found 0"
-      randomized_displays.delete(di)
-      break
-    end
+  # The one with six lit that shares three with 4 and two with 1 is 0.
+  randomized_displays.reject! do |di|
+    displays[0] = di if di.size == 6 && (di & displays[4]).size == 3 && (di & displays[1]).size == 2
   end
 
-  randomized_displays.each do |di|
-    if di.size == 5 && (di & displays[9]).size == 5
-      displays[5] = di
-      # puts "Found 5"
-      randomized_displays.delete(di)
-      break
-    end
+  # The one with five lit that shares everything with 9 is 5
+  randomized_displays.reject! do |di|
+    displays[5] = di if di.size == 5 && (di & displays[9]).size == 5
   end
 
-  randomized_displays.each do |di|
-    if di.size == 5
-      displays[2] = di
-      # puts "Found 2"
-      randomized_displays.delete(di)
-      break
-    end
+  # The one left with five lit is 2
+  randomized_displays.reject! do |di|
+    displays[2] = di if di.size == 5
   end
 
+  # The last one is 6
   displays[6] = randomized_displays[0]
-  # puts "Found 6"
 
-  value = end_of_line.map do |r|
-    displays.index(r)
-  end.join.to_i
-  result += value
+  parts.last(4).map { |r| displays.index(r) }.join.to_i
 end
 puts result
