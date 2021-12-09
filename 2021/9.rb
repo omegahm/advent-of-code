@@ -130,6 +130,7 @@ basins = []
 
 (0..8).each do |low_point|
   lava.each_with_index do |row, idx|
+    next unless row.include?(low_point)
     row.each_with_index do |point, jdx|
       next unless low_point == point
 
@@ -154,4 +155,4 @@ basins = []
   end
 end
 
-puts basins.map(&:size).sort.last(3).reduce(:*)
+puts basins.map(&:size).max(3).reduce(:*)
