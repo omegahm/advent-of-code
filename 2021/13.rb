@@ -785,7 +785,7 @@ HERE
 
 def print_grid(grid)
   grid.each do |row|
-    puts row.map { |e| e ? '⬛️' : '⬜️' }.join
+    puts row.map { |e| e ? '🟥' : '⬜️' }.join
   end
   puts
 end
