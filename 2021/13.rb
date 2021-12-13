@@ -791,9 +791,7 @@ def print_grid(grid)
 end
 
 dots = dots.lines.map { |line| line.chomp.split(',').map(&:to_i) }
-max_x = dots.map(&:first).max + 1
-max_y = dots.map(&:last).max + 1
-grid = max_y.times.map { max_x.times.map { false } }
+grid = (dots.map(&:last).max + 1).times.map { (dots.map(&:first).max + 1).times.map { false } }
 dots.each { |(x, y)| grid[y][x] = true }
 
 folds.lines.each_with_index do |fold, fold_count|
@@ -820,7 +818,7 @@ folds.lines.each_with_index do |fold, fold_count|
   grid = new_grid
 
   # PART 1
-  puts grid.flatten.select { |x| x }.count if fold_count == 0
+  puts grid.flatten.count { |x| x } if fold_count == 0
 end
 # PART 2
 print_grid(grid)
