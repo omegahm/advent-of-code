@@ -785,7 +785,7 @@ HERE
 
 def print_grid(grid)
   grid.each do |row|
-    puts row.map { |e| e ? '#' : '.' }.join
+    puts row.map { |e| e ? '⬛️' : '⬜️' }.join
   end
   puts
 end
@@ -808,7 +808,7 @@ folds.lines.each_with_index do |fold, fold_count|
         new_grid[y][x] = elem || grid[grid.size-y-1][x]
       end
     end
-  elsif fold_dir == 'x'
+  else
     grid.size.times do |y|
       new_grid[y] ||= []
       fold_num.times do |x|
