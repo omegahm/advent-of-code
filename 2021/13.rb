@@ -784,9 +784,13 @@ HERE
 # HERE
 
 def print_grid(grid)
+  puts '⬜️' * (2 + grid[0].size)
   grid.each do |row|
-    puts row.map { |e| e ? '🟥' : '⬜️' }.join
+    print '⬜️'
+    print row.map { |e| e ? '🟥' : '⬜️' }.join
+    puts '⬜️'
   end
+  puts '⬜️' * (2 + grid[0].size)
   puts
 end
 
