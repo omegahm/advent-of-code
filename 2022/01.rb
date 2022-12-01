@@ -2256,8 +2256,10 @@ INPUT
 
 calories = input.split("\n\n").map { |group| group.split("\n").map(&:to_i).sum }
 
-# PART 1
+puts "PART 1"
 puts calories.max
+puts
 
-# PART 2
-puts calories.sort.reverse.take(3).sum
+puts "PART 2"
+# puts calories.sort.reverse.take(3).sum
+puts calories.max(3)
