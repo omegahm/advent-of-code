@@ -137,6 +137,10 @@ end
 
 puts grid.flatten.select(&:itself).size
 
+grid.each do |row|
+  puts row.map { |tree| tree ? "🎄" : "⬛️" }.join
+end
+
 # PART 2
 def sightings(row, tree)
   (row.index { |elem| elem >= tree } || row.size - 1) + 1
