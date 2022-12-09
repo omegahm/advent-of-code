@@ -135,11 +135,12 @@ trees.transpose.each_with_index do |col, idx|
   end
 end
 
-puts grid.flatten.select(&:itself).size
 
 grid.each do |row|
   puts row.map { |tree| tree ? "🎄" : "⬛️" }.join
 end
+
+puts grid.flatten.select(&:itself).size
 
 # PART 2
 def sightings(row, tree)
@@ -162,6 +163,28 @@ trees.transpose.each_with_index do |col, idx|
     grid[jdx][idx] *= sightings(col[0...jdx].reverse, tree)
     grid[jdx][idx] *= sightings(col[(jdx+1)..], tree)
   end
+end
+
+grid.each do |row|
+  puts (row.map do |tree|
+    case tree
+    when 0
+      "⬛️"
+    when 1
+      "⬜️"
+    when 2
+      "🟦"
+    when 3..59
+      "🟨"
+    when 60..720
+      "🟥"
+    when grid.flatten.max
+      "🏡"
+    else
+      "🟩"
+
+    end
+  end.join)
 end
 
 puts grid.flatten.max
