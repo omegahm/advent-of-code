@@ -2073,8 +2073,10 @@ def move_tail(visited, head_pos, tail_pos)
   move_tail(visited, head_pos, tail_pos)
 end
 
-def visualize(visited)
-  # Visualize
+def visualize(visited, tail_pos = nil)
+  # Clear terminal
+  print "\033[2J\033[H"
+
   min_x = visited.map { |pos| pos[0] }.min
   max_x = visited.map { |pos| pos[0] }.max
   min_y = visited.map { |pos| pos[1] }.min
@@ -2083,13 +2085,19 @@ def visualize(visited)
   min_x.upto(max_x).each do |x|
     min_y.upto(max_y).each do |y|
       if visited.include?([x, y])
-        print "#"
+        if tail_pos && x == tail_pos[0] && y == tail_pos[1]
+          print "\033[31m#\033[0m"
+        else
+          print "#"
+        end
       else
         print "."
       end
     end
     puts
   end
+
+  sleep 0.01
 end
 
 # PART 1
@@ -2102,11 +2110,12 @@ input.lines.each do |line|
   amount.to_i.times do
     move_head(head_pos, dir)
     move_tail(visited, head_pos, tail_pos)
+    # visualize(visited, tail_pos)
   end
 end
 
 puts visited.count
-visualize(visited)
+# visualize(visited)
 
 # PART 2
 head_pos = [0, 0]
@@ -2137,8 +2146,9 @@ input.lines.each do |line|
   amount.to_i.times do
     move_head(head_pos, dir)
     move_tails(visited, head_pos, tails_pos)
+    # visualize(visited, tails_pos[-1])
   end
 end
 
 puts visited.count
-visualize(visited)
+# visualize(visited)
