@@ -2073,6 +2073,25 @@ def move_tail(visited, head_pos, tail_pos)
   move_tail(visited, head_pos, tail_pos)
 end
 
+def visualize(visited)
+  # Visualize
+  min_x = visited.map { |pos| pos[0] }.min
+  max_x = visited.map { |pos| pos[0] }.max
+  min_y = visited.map { |pos| pos[1] }.min
+  max_y = visited.map { |pos| pos[1] }.max
+
+  min_x.upto(max_x).each do |x|
+    min_y.upto(max_y).each do |y|
+      if visited.include?([x, y])
+        print "#"
+      else
+        print "."
+      end
+    end
+    puts
+  end
+end
+
 # PART 1
 head_pos = [0, 0]
 tail_pos = [0, 0]
@@ -2087,6 +2106,7 @@ input.lines.each do |line|
 end
 
 puts visited.count
+visualize(visited)
 
 # PART 2
 head_pos = [0, 0]
@@ -2121,3 +2141,4 @@ input.lines.each do |line|
 end
 
 puts visited.count
+visualize(visited)
