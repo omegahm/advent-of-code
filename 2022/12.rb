@@ -99,15 +99,16 @@ input.lines.each_with_index do |line, y|
 end
 
 DIRECTIONS = [
-  ["\033[91m^\033[m", -1,  0],
-  ["\033[91mv\033[m",  1,  0],
-  ["\033[91m>\033[m",  0,  1],
-  ["\033[91m<\033[m",  0, -1],
+  ["\033[41m^\033[m", -1,  0],
+  ["\033[41mv\033[m",  1,  0],
+  ["\033[41m>\033[m",  0,  1],
+  ["\033[41m<\033[m",  0, -1],
 ]
 
 def visualize(grid, prev, source, sink)
   x, y = [sink.x, sink.y]
   path = grid.map { |row| row.map { "." } }
+  sequence = []
 
   path[source.y][source.x] = "S"
   path[y][x] = "E"
@@ -118,11 +119,12 @@ def visualize(grid, prev, source, sink)
     break if node.nil?
 
     path[y][x] = direction unless path[y][x] == "E"
+    sequence << [x, y, direction]
     x, y = [node.x, node.y]
     direction = next_direction
   end
 
-  path
+  [path, sequence.reverse]
 end
 
 def shortest_path(grid, source)
@@ -166,11 +168,30 @@ def shortest_path(grid, source)
 end
 
 part1, prev = shortest_path(grid, source)
+
+path, sequence = visualize(grid, prev, source, sink)
+
+1.upto(sequence.size - 1) do |idx|
+  print "\033c"
+  xys = sequence.take(idx).map { |(x, y, direction)| [[x, y], direction] }.to_h
+
+  grid.size.times do |i|
+    grid[i].size.times do |j|
+      if source.x == j && source.y == i
+        print "\033[44m\033[30mS\033[m"
+      elsif sink.x == j && sink.y == i
+        print "\033[44m\033[30mE\033[m"
+      else
+        print xys[[j, i]] || grid[i][j].value.chr
+      end
+    end
+    puts
+  end
+  sleep 0.05
+end
+
+puts "\n===\nSOLUTIONS"
 puts part1[sink.y][sink.x]
-
-path = visualize(grid, prev, source, sink)
-puts path.map(&:join)
-
 part2 = as.map do |node|
   shortest_path(grid, node)[0][sink.y][sink.x]
 end
