@@ -99,10 +99,10 @@ input.lines.each_with_index do |line, y|
 end
 
 DIRECTIONS = [
-  ["\033[41m↑\033[m", -1,  0],
-  ["\033[41m↓\033[m",  1,  0],
-  ["\033[41m→\033[m",  0,  1],
-  ["\033[41m←\033[m",  0, -1],
+  ["↑", -1,  0],
+  ["↓",  1,  0],
+  ["→",  0,  1],
+  ["←",  0, -1],
 ]
 
 def visualize(grid, prev, source, sink)
@@ -171,52 +171,56 @@ part1, prev = shortest_path(grid, source)
 
 path, sequence = visualize(grid, prev, source, sink)
 
+puts "\033c"
 1.upto(sequence.size - 1) do |idx|
-  print "\033c"
+  output = []
+
+  # Move cursor to top left
+  output << "\033[#{grid.size}A"
+  output << "\033[#{grid[0].size}D"
+
   xys = sequence.take(idx).map { |(x, y, direction)| [[x, y], direction] }.to_h
 
   grid.size.times do |i|
     grid[i].size.times do |j|
       if source.x == j && source.y == i
-        print "\033[44m\033[30mS\033[m"
+        # Print colored S
+        output << "\033[44m\033[30mS\033[m"
       elsif sink.x == j && sink.y == i
-        print "\033[44m\033[30mE\033[m"
+        # Print colored E
+        output << "\033[44m\033[30mE\033[m"
       elsif xys[[j, i]]
-        print xys[[j, i]]
+        # Print colored arrow
+        output << "\033[41m"
+        output << xys[[j, i]]
+        output << "\033[m"
       else
+        # Print colored landscape
         color = case grid[i][j].value.chr
-        when "a"
-          "0;255;0"
-        when "b"
-          "0;238;0"
-        when "c"
-          "0;221;0"
-        when "d"
-          "0;204;0"
-        when "e"
-          "0;187;0"
-        when "f"
-          "0;170;0"
-        when "g".."u"
-          "0;153;0"
-        when "v"
-          "165;42;42"
-        when "w"
-          "139;69;19"
-        when "x"
-          "150;75;00"
-        when "y"
-          "107;68;35"
-        when "z"
-          "93;93;93"
+        when "a" then "0;255;0"
+        when "b" then "0;238;0"
+        when "c" then "0;221;0"
+        when "d" then "0;204;0"
+        when "e" then "0;187;0"
+        when "f" then "0;170;0"
+        when "g".."u" then "0;153;0"
+        when "v" then "165;42;42"
+        when "w" then "139;69;19"
+        when "x" then "150;75;00"
+        when "y" then "107;68;35"
+        when "z" then "93;93;93"
         end
 
-        print "\e[38;2;#{color}m\e[48;2;#{color}m#{grid[i][j].value.chr}\e[0m"
+        output << "\e[38;2;#{color}m"
+        output << "\e[48;2;#{color}m"
+        output << grid[i][j].value.chr
+        output << "\e[0m"
       end
     end
-    puts
+
+    puts output.join
+    output = []
   end
-  sleep 0.05
 end
 
 puts "\n===\nSOLUTIONS"
