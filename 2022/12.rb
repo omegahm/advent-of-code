@@ -99,10 +99,10 @@ input.lines.each_with_index do |line, y|
 end
 
 DIRECTIONS = [
-  ["\033[41m^\033[m", -1,  0],
-  ["\033[41mv\033[m",  1,  0],
-  ["\033[41m>\033[m",  0,  1],
-  ["\033[41m<\033[m",  0, -1],
+  ["\033[41m↑\033[m", -1,  0],
+  ["\033[41m↓\033[m",  1,  0],
+  ["\033[41m→\033[m",  0,  1],
+  ["\033[41m←\033[m",  0, -1],
 ]
 
 def visualize(grid, prev, source, sink)
@@ -181,8 +181,37 @@ path, sequence = visualize(grid, prev, source, sink)
         print "\033[44m\033[30mS\033[m"
       elsif sink.x == j && sink.y == i
         print "\033[44m\033[30mE\033[m"
+      elsif xys[[j, i]]
+        print xys[[j, i]]
       else
-        print xys[[j, i]] || grid[i][j].value.chr
+        color = case grid[i][j].value.chr
+        when "a"
+          "0;255;0"
+        when "b"
+          "0;238;0"
+        when "c"
+          "0;221;0"
+        when "d"
+          "0;204;0"
+        when "e"
+          "0;187;0"
+        when "f"
+          "0;170;0"
+        when "g".."u"
+          "0;153;0"
+        when "v"
+          "165;42;42"
+        when "w"
+          "139;69;19"
+        when "x"
+          "150;75;00"
+        when "y"
+          "107;68;35"
+        when "z"
+          "93;93;93"
+        end
+
+        print "\e[38;2;#{color}m\e[48;2;#{color}m#{grid[i][j].value.chr}\e[0m"
       end
     end
     puts
