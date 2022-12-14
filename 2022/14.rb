@@ -154,43 +154,6 @@ input = <<~INPUT
 463,51 -> 463,53 -> 459,53 -> 459,59 -> 470,59 -> 470,53 -> 468,53 -> 468,51
 INPUT
 
-def parse(input)
-  cave = { [500, 0] => "↓" }
-  minx, maxx, miny, maxy = 500, 500, 0, 0
-
-  input.lines.map(&:chomp).each do |line|
-    line.split(" -> ").each_cons(2) do |a, b|
-      x1, y1 = a.split(",").map(&:to_i)
-      x2, y2 = b.split(",").map(&:to_i)
-
-      minx = [minx, x1, x2].min
-      maxx = [maxx, x1, x2].max
-      miny = [miny, y1, y2].min
-      maxy = [maxy, y1, y2].max
-
-      if x1 == x2
-        y1, y2 = [y1, y2].sort
-        y1.upto(y2) do |y|
-          cave[[x1, y]] = "#"
-        end
-      elsif y1 == y2
-        x1, x2 = [x1, x2].sort
-        x1.upto(x2) do |x|
-          cave[[x, y1]] = "#"
-        end
-      end
-    end
-  end
-
-  miny.upto(maxy) do |y|
-    minx.upto(maxx) do |x|
-      cave[[x, y]] ||= "."
-    end
-  end
-
-  [cave, minx, maxx, miny, maxy]
-end
-
 def visualize(minx, maxx, miny, maxy, cave)
   output = ""
   output << "\033[#{maxx}A"
@@ -263,12 +226,43 @@ def solve(cave, minx, maxx, miny, maxy)
   cave.values.count { |v| v == "o" }
 end
 
+cave = { [500, 0] => "↓" }
+minx, maxx, miny, maxy = 500, 500, 0, 0
+
+input.lines.map(&:chomp).each do |line|
+  line.split(" -> ").each_cons(2) do |a, b|
+    x1, y1 = a.split(",").map(&:to_i)
+    x2, y2 = b.split(",").map(&:to_i)
+
+    minx = [minx, x1, x2].min
+    maxx = [maxx, x1, x2].max
+    miny = [miny, y1, y2].min
+    maxy = [maxy, y1, y2].max
+
+    if x1 == x2
+      y1, y2 = [y1, y2].sort
+      y1.upto(y2) do |y|
+        cave[[x1, y]] = "#"
+      end
+    elsif y1 == y2
+      x1, x2 = [x1, x2].sort
+      x1.upto(x2) do |x|
+        cave[[x, y1]] = "#"
+      end
+    end
+  end
+end
+
+miny.upto(maxy) do |y|
+  minx.upto(maxx) do |x|
+    cave[[x, y]] ||= "."
+  end
+end
+
 # PART 1
-puts solve(*parse(input))
+puts solve(cave, minx, maxx, miny, maxy)
 
 # PART 2
-cave, minx, maxx, miny, maxy = parse(input)
-
 (-minx).upto(maxx*2) do |x|
   cave[[x, maxy+2]] = "#"
 end
