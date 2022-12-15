@@ -156,8 +156,7 @@ INPUT
 
 def visualize(minx, maxx, miny, maxy, cave)
   output = ""
-  output << "\033[#{maxx}A"
-  output << "\033[#{maxy}D"
+  output << "\033[H"
 
   miny.upto(maxy) do |y|
     minx.upto(maxx) do |x|
@@ -182,13 +181,13 @@ def visualize(minx, maxx, miny, maxy, cave)
   puts output
 end
 
-def solve(cave, minx, maxx, miny, maxy)
-  # puts "\033c"
+def solve(cave, minx, maxx, miny, maxy, visualize = false)
+  puts "\033c" if visualize
   done = false
 
   until done
     break if cave[[500, 0]] == "o"
-    # visualize(minx, maxx, miny, maxy, cave)
+    visualize(minx, maxx, miny, maxy, cave) if visualize
 
     moving = true
     current_x, current_y = [500, 0]
@@ -221,7 +220,7 @@ def solve(cave, minx, maxx, miny, maxy)
       end
     end
   end
-  # visualize(minx, maxx, miny, maxy, cave)
+  visualize(minx, maxx, miny, maxy, cave) if visualize
 
   cave.values.count { |v| v == "o" }
 end
@@ -260,15 +259,15 @@ miny.upto(maxy) do |y|
 end
 
 # PART 1
-puts solve(cave, minx, maxx, miny, maxy)
+puts solve(cave, minx, maxx, miny, maxy, visualize = false)
 
 # PART 2
 (-minx).upto(maxx*2) do |x|
   cave[[x, maxy+2]] = "#"
 end
 
-minx = -minx
-maxx *= 2
+minx = minx - maxy
+maxx = maxx + maxy
 maxy += 2
 
 miny.upto(maxy) do |y|
@@ -277,4 +276,4 @@ miny.upto(maxy) do |y|
   end
 end
 
-puts solve(cave, minx, maxx, miny, maxy)
+puts solve(cave, minx, maxx, miny, maxy, visualize = true)
