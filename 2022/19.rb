@@ -56,66 +56,94 @@ blueprints = input.split("\n").map do |line|
 end
 
 $memo = {}
-def backtrack(costs, time, robots = [1, 0, 0, 0], resources = [0, 0, 0, 0])
-  $memo[[costs, time, robots, resources]] ||= begin
-    next_resources = [
-      resources[ORE] + robots[ORE],
-      resources[CLAY] + robots[CLAY],
-      resources[OBSIDIAN] + robots[OBSIDIAN],
-      resources[GEODE] + robots[GEODE],
-    ]
-
+def backtrack(costs, time, ore_robots = 1, clay_robots = 0, obsidian_robots = 0, geode_robots = 0, ore = 0, clay = 0, obsidian = 0, geode = 0)
+  $memo[[costs, time, ore_robots, clay_robots, obsidian_robots, geode_robots, ore, clay, obsidian, geode]] ||= begin
     # We cannot benefit from building on the last timestep,
     # so we just return the next amount of geodes
-    return next_resources[GEODE] if time == 1
+    return geode + geode_robots if time == 1
 
     # If we can build a geode robot, do it
-    if resources[ORE] >= costs[GEODE][ORE] && resources[OBSIDIAN] >= costs[GEODE][OBSIDIAN]
+    if ore >= costs[GEODE][ORE] && obsidian >= costs[GEODE][OBSIDIAN]
       # We can build a geode robot
-      new_robots = robots.dup
-      new_robots[GEODE] += 1
-      new_resources = next_resources.dup
-      new_resources[ORE] -= costs[GEODE][ORE]
-      new_resources[OBSIDIAN] -= costs[GEODE][OBSIDIAN]
-
-      return backtrack(costs, time - 1, new_robots, new_resources)
+      return backtrack(
+        costs,
+        time - 1,
+        ore_robots,
+        clay_robots,
+        obsidian_robots,
+        geode_robots + 1,
+        ore - costs[GEODE][ORE] + ore_robots,
+        clay + clay_robots,
+        obsidian - costs[GEODE][OBSIDIAN] + obsidian_robots,
+        geode + geode_robots
+      )
     end
 
     # We need to choose between obsidian, clay, and ore robots; or nothing
     possible = []
 
-    if resources[ORE] >= costs[OBSIDIAN][ORE] && resources[CLAY] >= costs[OBSIDIAN][CLAY]
+    if ore >= costs[OBSIDIAN][ORE] && clay >= costs[OBSIDIAN][CLAY]
       # We can build an obsidian robot
-      new_robots = robots.dup
-      new_robots[OBSIDIAN] += 1
-      new_resources = next_resources.dup
-      new_resources[ORE] -= costs[OBSIDIAN][ORE]
-      new_resources[CLAY] -= costs[OBSIDIAN][CLAY]
-
-      possible << backtrack(costs, time - 1, new_robots, new_resources)
+      possible << backtrack(
+        costs,
+        time - 1,
+        ore_robots,
+        clay_robots,
+        obsidian_robots + 1,
+        geode_robots,
+        ore - costs[OBSIDIAN][ORE] + ore_robots,
+        clay - costs[OBSIDIAN][CLAY] + clay_robots,
+        obsidian + obsidian_robots,
+        geode + geode_robots
+      )
     end
 
-    if resources[ORE] >= costs[CLAY][ORE]
+    if ore >= costs[CLAY][ORE]
       # We can build a clay robot
-      new_robots = robots.dup
-      new_robots[CLAY] += 1
-      new_resources = next_resources.dup
-      new_resources[ORE] -= costs[CLAY][ORE]
-      possible << backtrack(costs, time - 1, new_robots, new_resources)
+      possible << backtrack(
+        costs,
+        time - 1,
+        ore_robots,
+        clay_robots + 1,
+        obsidian_robots,
+        geode_robots,
+        ore - costs[CLAY][ORE] + ore_robots,
+        clay + clay_robots,
+        obsidian + obsidian_robots,
+        geode + geode_robots
+      )
     end
 
-    if resources[ORE] >= costs[ORE][ORE]
+    if ore >= costs[ORE][ORE]
       # We can build an ore robot
-      new_robots = robots.dup
-      new_robots[ORE] += 1
-      new_resources = next_resources.dup
-      new_resources[ORE] -= costs[ORE][ORE]
-      possible << backtrack(costs, time - 1, new_robots, new_resources)
+      possible << backtrack(
+        costs,
+        time - 1,
+        ore_robots + 1,
+        clay_robots,
+        obsidian_robots,
+        geode_robots,
+        ore - costs[ORE][ORE] + ore_robots,
+        clay + clay_robots,
+        obsidian + obsidian_robots,
+        geode + geode_robots
+      )
     end
 
-    if resources[ORE] < $max_ore_cost
+    if ore < $max_ore_cost
       # Do nothing
-      possible << backtrack(costs, time - 1, robots.dup, next_resources.dup)
+      possible << backtrack(
+        costs,
+        time - 1,
+        ore_robots,
+        clay_robots,
+        obsidian_robots,
+        geode_robots,
+        ore + ore_robots,
+        clay + clay_robots,
+        obsidian + obsidian_robots,
+        geode + geode_robots
+      )
     end
 
     possible.max
@@ -123,15 +151,19 @@ def backtrack(costs, time, robots = [1, 0, 0, 0], resources = [0, 0, 0, 0])
 end
 
 # PART 1
+t = Time.now
 result = blueprints.map.with_index do |blueprint, idx|
   backtrack(blueprint, 24) * (idx + 1)
 end.sum
 
 puts result
+puts "Took #{Time.now - t} seconds"
 
 # PART 2
+t = Time.now
 result = blueprints.take(3).map do |blueprint|
   backtrack(blueprint, 32)
 end.reduce(&:*)
 
 puts result
+puts "Took #{Time.now - t} seconds"
