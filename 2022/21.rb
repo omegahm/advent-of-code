@@ -2046,7 +2046,6 @@ lcrw: frlc - hfvh
 rbsb: fsdg * hzft
 INPUT
 
-
 monkeys = {}
 input.lines.each do |line|
   if /^(.*): (\d+)/ === line
@@ -2070,7 +2069,9 @@ def solve(monkeys, key)
 end
 
 puts "PART 1"
+t = Time.now
 puts solve(monkeys, "root")
+puts "Took #{Time.now - t} seconds"
 puts
 
 puts "PART 2"
@@ -2159,6 +2160,7 @@ def simplify(str, right)
   [str, right]
 end
 
+t = Time.now
 monkeys["humn"] = "human"
 left, _op, right = monkeys["root"]
 left = gather(monkeys, left)
@@ -2167,3 +2169,4 @@ right = solve(monkeys, right)
 left, right = simplify(left, right)
 print "\033c#{left} = " if ENV["VISUALIZE"]
 puts "#{right}"
+puts "Took #{Time.now - t} seconds"
