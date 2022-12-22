@@ -242,12 +242,38 @@ def parse(input)
   [board, program]
 end
 
-def visualize(board)
-  print "\033c"
-  board.each do |row|
-    puts row.map { |char| char || " " }.join
+HEADING = { up: "↑", right: "→", down: "↓", left: "←" }
+COLOR_MAP = {
+  "↑" => "\033[41m",
+  "→" => "\033[42m",
+  "↓" => "\033[43m",
+  "←" => "\033[44m",
+  "." => "\033[107m",
+  "#" => "\033[40m",
+}
+$visualized = false
+def visualize(board, current, delay = 0.00001)
+  if $visualized
+    x, y = current
+    print "\033[#{y+1};#{x+1}H"
+    print COLOR_MAP[board[y][x]]
+    print board[y][x]
+    print "\033[0m"
+  else
+    print "\033c"
+    board.each do |row|
+      puts (row.map do |char|
+        if char
+          COLOR_MAP[char] + char + "\033[0m"
+        else
+          " "
+        end
+      end.join)
+    end
+    puts
+    $visualized = true
   end
-  puts
+  sleep delay
 end
 
 def move(board, current, heading)
@@ -448,8 +474,6 @@ def move_cube(board, current, heading)
   new_heading
 end
 
-HEADING = { up: "↑", right: "→", down: "↓", left: "←" }
-
 def solve(input, move_method: :move)
   board, program = parse(input)
 
@@ -461,7 +485,6 @@ def solve(input, move_method: :move)
   heading = :right
 
   board[current[1]][current[0]] = HEADING[heading]
-  # visualize(board)
 
   program.each do |n, d|
     n.times do
@@ -469,6 +492,7 @@ def solve(input, move_method: :move)
       board[y][x] = HEADING[heading]
       new_heading = send(move_method, board, current, heading)
       heading = new_heading if new_heading
+      visualize(board, [x, y]) if ENV["VISUALIZE"] && move_method == :move_cube
     end
 
     heading = {
@@ -487,15 +511,21 @@ def solve(input, move_method: :move)
     }[d][heading] unless d == ""
   end
 
-  # visualize(board)
   x, y = current
   heading_score = %i(right down left up).index(heading)
+  print "\033[#{board.size + 1};0H" if ENV["VISUALIZE"] && move_method == :move_cube
   puts "  Final position in board: #{x+1}, #{y+1}"
   puts "  Final heading: #{heading} (#{heading_score})"
   puts "  Final: #{y+1} * 1000 + #{x+1} * 4 + #{heading_score} = #{(y+1) * 1000 + (x+1) * 4 + heading_score}"
 end
 
 puts "Part 1"
+t = Time.now
 solve(input)
+puts "Took #{Time.now - t} seconds"
+puts
+
+t = Time.now
 puts "Part 2"
 solve(input, move_method: :move_cube)
+puts "Took #{Time.now - t} seconds"
