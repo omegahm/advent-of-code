@@ -243,6 +243,22 @@ def parse(input)
 end
 
 HEADING = { up: "↑", right: "→", down: "↓", left: "←" }
+
+NEW_HEADING = {
+  "R" => {
+    up: :right,
+    right: :down,
+    down: :left,
+    left: :up,
+  },
+  "L" => {
+    up: :left,
+    right: :up,
+    down: :right,
+    left: :down,
+  }
+}
+
 COLOR_MAP = {
   "↑" => "\033[41m",
   "→" => "\033[42m",
@@ -251,6 +267,7 @@ COLOR_MAP = {
   "." => "\033[107m",
   "#" => "\033[40m",
 }
+
 $visualized = false
 def visualize(board, current, delay = 0.00001)
   if $visualized
@@ -281,61 +298,47 @@ def move(board, current, heading)
 
   case heading
   when :right
-    return if board.fetch(y, [])[x+1] == "#"
     x += 1
+    return if board[y] && board[y][x] == "#"
 
-    if x > board[0].size - 1 || board.fetch(y, [])[x].nil?
+    if x > board[0].size - 1 || board[y][x].nil?
       new_y = y
       new_x = 0
-
-      new_x += 1 until board.fetch(new_y, [])[new_x]
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
+      new_x += 1 until board[new_y][new_x]
     end
   when :left
-    return if board.fetch(y, [])[x-1] == "#"
     x -= 1
+    return if board[y] && board[y][x] == "#"
 
-    if x < 0 || board.fetch(y, [])[x].nil?
+    if x < 0 || board[y][x].nil?
       new_y = y
-      new_x = board.fetch(y, []).size - 1
-
-      new_x -= 1 until board.fetch(new_y, [])[new_x]
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
+      new_x = board[y].size - 1
+      new_x -= 1 until board[new_y][new_x]
     end
   when :up
-    return if board.fetch(y-1, [])[x] == "#"
     y -= 1
+    return if board[y] && board[y][x] == "#"
 
-    if y < 0 || board.fetch(y, [])[x].nil?
+    if y < 0 || board[y][x].nil?
       new_y = board.size - 1
       new_x = x
-
-      new_y -= 1 until board.fetch(new_y, [])[new_x]
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
+      new_y -= 1 until board[new_y][new_x]
     end
   when :down
-    return if board.fetch(y+1, [])[x] == "#"
     y += 1
+    return if board[y] && board[y][x] == "#"
 
-    if y > board.size - 1 || board.fetch(y, [])[x].nil?
+    if y > board.size - 1 || board[y][x].nil?
       new_y = 0
       new_x = x
-
-      new_y += 1 until board.fetch(new_y, [])[new_x]
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
+      new_y += 1 until board[new_y][new_x]
     end
   end
 
-  current[0] = x
-  current[1] = y
+  return if new_x && new_y && board[new_y][new_x] == "#"
+
+  current[0] = new_x || x
+  current[1] = new_y || y
 
   nil
 end
@@ -361,12 +364,10 @@ def move_cube(board, current, heading)
 
   case heading
   when :right
-    return if board.fetch(y, [])[x+1] == "#"
     x += 1
+    return if board[y] && board[y][x] == "#"
 
-    if x > board[0].size - 1 || board.fetch(y, [])[x].nil?
-      x -= 1
-
+    if x > board[0].size - 1 || board[y][x].nil?
       case region
       when 2
         new_heading = :left
@@ -385,17 +386,12 @@ def move_cube(board, current, heading)
         new_x = y - 100
         new_y = 149
       end
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
     end
   when :left
-    return if board.fetch(y, [])[x-1] == "#"
     x -= 1
+    return if board[y] && board[y][x] == "#"
 
-    if x < 0 || board.fetch(y, [])[x].nil?
-      x += 1
-
+    if x < 0 || board[y][x].nil?
       case region
       when 1
         new_heading = :right
@@ -414,16 +410,12 @@ def move_cube(board, current, heading)
         new_x = y - 100
         new_y = 0
       end
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
     end
   when :up
-    return if board.fetch(y-1, [])[x] == "#"
     y -= 1
+    return if board[y] && board[y][x] == "#"
 
-    if y < 0 || board.fetch(y, [])[x].nil?
-      y += 1
+    if y < 0 || board[y][x].nil?
       case region
       when 1
         new_heading = :right
@@ -438,16 +430,12 @@ def move_cube(board, current, heading)
         new_x = 50
         new_y = x + 50
       end
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
     end
   when :down
-    return if board.fetch(y+1, [])[x] == "#"
     y += 1
+    return if board[y] && board[y][x] == "#"
 
-    if y > board.size - 1 || board.fetch(y, [])[x].nil?
-      y -= 1
+    if y > board.size - 1 || board[y][x].nil?
       case region
       when 2
         new_heading = :left
@@ -462,58 +450,38 @@ def move_cube(board, current, heading)
         new_x = x + 100
         new_y = 0
       end
-
-      return if board.fetch(new_y, [])[new_x] == "#"
-      x, y = [new_x, new_y]
     end
   end
 
-  current[0] = x
-  current[1] = y
+  return if new_y && new_x && board[new_y][new_x] == "#"
+
+  current[0] = new_x || x
+  current[1] = new_y || y
 
   new_heading
 end
 
-def solve(input, move_method: :move)
+def solve(part, input)
   board, program = parse(input)
 
-  current = [
-    [board[0].index("."), board[0].index("#")].compact.min,
-    0
-  ]
-
+  current = [board[0].index("."), 0]
   heading = :right
-
-  board[current[1]][current[0]] = HEADING[heading]
 
   program.each do |n, d|
     n.times do
       x, y = current
       board[y][x] = HEADING[heading]
-      new_heading = send(move_method, board, current, heading)
+      new_heading = send(part == :part1 ? :move : :move_cube, board, current, heading)
       heading = new_heading if new_heading
-      visualize(board, [x, y]) if ENV["VISUALIZE"] && move_method == :move_cube
+      visualize(board, [x, y]) if ENV["VISUALIZE"] && part == :part2
     end
 
-    heading = {
-      "R" => {
-        up: :right,
-        right: :down,
-        down: :left,
-        left: :up,
-      },
-      "L" => {
-        up: :left,
-        right: :up,
-        down: :right,
-        left: :down,
-      }
-    }[d][heading] unless d == ""
+    heading = NEW_HEADING[d][heading] unless d == ""
   end
 
   x, y = current
   heading_score = %i(right down left up).index(heading)
-  print "\033[#{board.size + 1};0H" if ENV["VISUALIZE"] && move_method == :move_cube
+  print "\033[#{board.size + 1};0H" if ENV["VISUALIZE"] && part == :part2
   puts "  Final position in board: #{x+1}, #{y+1}"
   puts "  Final heading: #{heading} (#{heading_score})"
   puts "  Final: #{y+1} * 1000 + #{x+1} * 4 + #{heading_score} = #{(y+1) * 1000 + (x+1) * 4 + heading_score}"
@@ -521,11 +489,11 @@ end
 
 puts "Part 1"
 t = Time.now
-solve(input)
+solve(:part1, input)
 puts "Took #{Time.now - t} seconds"
 puts
 
 t = Time.now
 puts "Part 2"
-solve(input, move_method: :move_cube)
+solve(:part2, input)
 puts "Took #{Time.now - t} seconds"
