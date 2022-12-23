@@ -113,7 +113,7 @@ def all_neighbours_empty?(elves, x, y)
     elves[[x - 1, y - 1]], elves[[    x, y - 1]], elves[[x + 1, y - 1]],
     elves[[x - 1,     y]],                        elves[[x + 1,     y]],
     elves[[x - 1, y + 1]], elves[[    x, y + 1]], elves[[x + 1, y + 1]],
-  ].all?(&:nil?)
+  ].compact.empty?
 end
 
 def go_north?(elves, x, y)
@@ -121,7 +121,7 @@ def go_north?(elves, x, y)
     elves[[x - 1, y - 1]],
     elves[[    x, y - 1]],
     elves[[x + 1, y - 1]],
-  ].all?(&:nil?)
+  ].compact.empty?
 end
 
 def go_south?(elves, x, y)
@@ -129,7 +129,7 @@ def go_south?(elves, x, y)
     elves[[x - 1, y + 1]],
     elves[[    x, y + 1]],
     elves[[x + 1, y + 1]],
-  ].all?(&:nil?)
+  ].compact.empty?
 end
 
 def go_west?(elves, x, y)
@@ -137,7 +137,7 @@ def go_west?(elves, x, y)
     elves[[x - 1, y - 1]],
     elves[[x - 1,     y]],
     elves[[x - 1, y + 1]],
-  ].all?(&:nil?)
+  ].compact.empty?
 end
 
 def go_east?(elves, x, y)
@@ -145,10 +145,12 @@ def go_east?(elves, x, y)
     elves[[x + 1, y - 1]],
     elves[[x + 1,     y]],
     elves[[x + 1, y + 1]],
-  ].all?(&:nil?)
+  ].compact.empty?
 end
 
 def visualize(elves)
+  return unless ENV["VISUALIZE"]
+  print "\033c"
   minX = elves.keys.map(&:first).min
   maxX = elves.keys.map(&:first).max
   minY = elves.keys.map(&:last).min
@@ -156,7 +158,15 @@ def visualize(elves)
 
   minY.upto(maxY) do |y|
     minX.upto(maxX) do |x|
-      print elves[[x, y]] ? '#' : '.'
+      color = if elves[[x, y]]
+        "0;221;0"
+      else
+        "255;255;255"
+      end
+
+      print "\e[38;2;#{color}m"
+      print "\e[48;2;#{color}mX"
+      print "\033[0m"
     end
     puts
   end
@@ -171,7 +181,9 @@ def count_map(elves)
   (maxX - minX + 1) * (maxY - minY + 1) - elves.count { |_, v| v }
 end
 
-def solve(elves, count: 10)
+def solve(elves, part)
+  visualize(elves) if part == 2
+
   directions = [
     [:north, 0, -1],
     [:south, 0,  1],
@@ -179,48 +191,47 @@ def solve(elves, count: 10)
     [:east,  1,  0],
   ]
 
-  count.times do |i|
+  i = 0
+  loop do
+    return count_map(elves) if part == 1 && i == 10
+    i += 1
     proposed_moves = {}
 
     elves.each do |(x, y), _|
       next if all_neighbours_empty?(elves, x, y)
 
-      moved = false
       directions.each do |(direction, dx, dy)|
-        if !moved && send("go_#{direction}?", elves, x, y)
+        if send("go_#{direction}?", elves, x, y)
           proposed_moves[[x, y]] = [x + dx, y + dy]
-          moved = true
+          break
         end
       end
     end
 
-    if proposed_moves.empty?
-      puts "No more moves possible"
-      puts "Round #{i+1}"
-      return
-    end
-
     proposed_moves = proposed_moves.reject { |_, v| proposed_moves.values.count(v) > 1 }
+
+    return "No more moves possible\nRound #{i}" if proposed_moves.empty?
 
     proposed_moves.each do |(x, y), (nx, ny)|
       elves.delete([x, y])
       elves[[nx, ny]] = true
     end
 
-    # puts "\n== End of Round #{i+1} =="
-    # visualize(elves)
+    visualize(elves) if part == 2
 
     directions.rotate!
   end
-
-  puts count_map(elves)
 end
 
 puts "PART 1"
+t = Time.now
 elves = parse(input)
-solve(elves)
+puts solve(elves, 1)
+puts "Took #{Time.now - t} seconds"
 
 puts
 puts "PART 2"
+t = Time.now
 elves = parse(input)
-solve(elves, count: 9999)
+puts solve(elves, 2)
+puts "Took #{Time.now - t} seconds"
