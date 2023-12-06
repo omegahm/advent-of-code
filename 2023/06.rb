@@ -12,13 +12,13 @@ INPUT
 races = input.lines.map { |line| line.scan(/\d+/).map(&:to_i) }.transpose
 
 def ways(time, distance)
-  time.times.map do |holding|
+  time.times.select do |holding|
     holding * (time - holding) > distance
   end
 end
 
-puts "Part 1", races.map { |(time, distance)| ways(time, distance).count(true) }.reduce(:*)
+puts "Part 1", races.map { |(time, distance)| ways(time, distance).size }.reduce(:*)
 
 # PART 2
 time, distance = race = input.lines.map { _1.gsub(/[^\d]/, "").scan(/\d+/).map(&:to_i) }.flatten
-puts "Part 2", ways(time, distance).count(true)
+puts "Part 2", ways(time, distance).size

@@ -1,43 +1,38 @@
 #################
 # EXAMPLE INPUT #
 #################
-seeds = "79 14 55 13"
+input = <<~INPUT.strip
+seeds: 79 14 55 13
 
-seed_to_soil = <<~INPUT.strip
+seed-to-soil map:
 50 98 2
 52 50 48
-INPUT
 
-soil_to_fertilizer = <<~INPUT.strip
+soil-to-fertilizer map:
 0 15 37
 37 52 2
 39 0 15
-INPUT
 
-fertilizer_to_water = <<~INPUT.strip
+fertilizer-to-water map:
 49 53 8
 0 11 42
 42 0 7
 57 7 4
-INPUT
 
-water_to_light = <<~INPUT.strip
+water-to-light map:
 88 18 7
 18 25 70
-INPUT
 
-light_to_temperature = <<~INPUT.strip
+light-to-temperature map:
 45 77 23
 81 45 19
 68 64 13
-INPUT
 
-temperature_to_humidity = <<~INPUT.strip
+temperature-to-humidity map:
 0 69 1
 1 0 69
-INPUT
 
-humidity_to_location = <<~INPUT.strip
+humidity-to-location map:
 60 56 37
 56 93 4
 INPUT
@@ -45,9 +40,10 @@ INPUT
 ################
 # ACTUAL INPUT #
 ################
-seeds = "1367444651 99920667 3319921504 153335682 67832336 139859832 2322838536 666063790 1591621692 111959634 442852010 119609663 733590868 56288233 2035874278 85269124 4145746192 55841637 864476811 347179760"
+input = <<~INPUT.strip
+seeds: 1367444651 99920667 3319921504 153335682 67832336 139859832 2322838536 666063790 1591621692 111959634 442852010 119609663 733590868 56288233 2035874278 85269124 4145746192 55841637 864476811 347179760
 
-seed_to_soil = <<~INPUT.strip
+seed-to-soil map:
 873256303 3438158294 3400501
 3338810960 408700040 99469568
 876656804 586381004 55967396
@@ -83,9 +79,8 @@ seed_to_soil = <<~INPUT.strip
 312787818 0 174869618
 1058609248 3154319343 128873311
 2176265284 508169608 5054111
-INPUT
 
-soil_to_fertilizer = <<~INPUT.strip
+soil-to-fertilizer map:
 297032819 3559164217 26523093
 323555912 2482284077 316032053
 74171080 3214516077 10202585
@@ -119,9 +114,8 @@ soil_to_fertilizer = <<~INPUT.strip
 0 3799867212 74171080
 2136968110 3063341126 151174951
 1136595967 3742323246 49312371
-INPUT
 
-fertilizer_to_water = <<~INPUT.strip
+fertilizer-to-water map:
 0 478733437 191375707
 2494518625 3362803490 180386054
 1605510969 1985802816 27464898
@@ -150,9 +144,8 @@ fertilizer_to_water = <<~INPUT.strip
 191375707 2113952634 129544809
 3931597621 2879611847 363369675
 2674904679 4214148122 80819174
-INPUT
 
-water_to_light = <<~INPUT.strip
+water-to-light map:
 3219102205 2181622520 201394006
 920319894 2563844887 124975374
 739491533 2383016526 180828361
@@ -168,9 +161,8 @@ water_to_light = <<~INPUT.strip
 2670352125 2688820261 548750080
 1045295268 348907250 25626494
 2188032039 3610552366 197917266
-INPUT
 
-light_to_temperature = <<~INPUT.strip
+light-to-temperature map:
 2153765789 597465407 100160624
 2781845200 2181361650 40610317
 667326513 1345068833 191904517
@@ -203,9 +195,8 @@ light_to_temperature = <<~INPUT.strip
 1561496578 565684342 31781065
 2822455517 4057413187 79650392
 652508835 775711035 14817678
-INPUT
 
-temperature_to_humidity = <<~INPUT.strip
+temperature-to-humidity map:
 539306376 906765326 12587914
 0 164719538 374586838
 3299714596 2417002864 137882274
@@ -238,9 +229,8 @@ temperature_to_humidity = <<~INPUT.strip
 2770491195 3808736451 110510337
 3585377675 1872985669 138173528
 4073633701 2196570688 220432176
-INPUT
 
-humidity_to_location = <<~INPUT.strip
+humidity-to-location map:
 3656475570 3037182697 7397903
 682722270 547529272 780546181
 266636474 1328075453 316323944
@@ -259,13 +249,13 @@ humidity_to_location = <<~INPUT.strip
 3985184750 3813004676 189974951
 INPUT
 
-seeds = seeds.split(" ").map(&:to_i)
+seeds = input.lines.first.split(":")[1].split(" ").map(&:to_i)
 
-seed_to_soil, soil_to_fertilizer, fertilizer_to_water, water_to_light, light_to_temperature, temperature_to_humidity, humidity_to_location =
-[seed_to_soil, soil_to_fertilizer, fertilizer_to_water, water_to_light, light_to_temperature, temperature_to_humidity, humidity_to_location].map do |map|
-  map.lines.map do |line|
-    dest, source, count = line.split(" ").map(&:to_i)
-    [(source .. source+count-1), (dest .. dest+count-1)]
+maps = input.split("\n\n").drop(1).map do |map|
+  map.split("\n").drop(1).map do |inner|
+    inner.split(" ").map(&:to_i)
+  end.map do |dest, source, count|
+    [(source .. source + count - 1), (dest .. dest + count - 1)]
   end
 end
 
@@ -273,29 +263,27 @@ end
 # PART 1 #
 ##########
 
-def find_in_map(seed, map)
-  source, dest = map.find { |(inner_map, _)| inner_map.include?(seed) }
-  return seed if source.nil?
+# Note:
+# Part 1 is solved in a similar manner to Part 2, by taking the 1 element ranges and mapping them through the maps.
+# This is the naive Part 1 solution.
 
-  seed + dest.begin - source.begin
-end
+# def find_in_map(seed, map)
+#   source, dest = map.find { |(inner_map, _)| inner_map.include?(seed) }
+#   return seed if source.nil?
 
-result = seeds.map do |seed|
-  seed = find_in_map(seed, seed_to_soil)
-  seed = find_in_map(seed, soil_to_fertilizer)
-  seed = find_in_map(seed, fertilizer_to_water)
-  seed = find_in_map(seed, water_to_light)
-  seed = find_in_map(seed, light_to_temperature)
-  seed = find_in_map(seed, temperature_to_humidity)
-  find_in_map(seed, humidity_to_location)
-end.min
+#   seed + dest.begin - source.begin
+# end
 
-puts "Part 1: #{result}"
+# result = seeds.map do |seed|
+#   maps.each { |map| seed = find_in_map(seed, map) }
+#   seed
+# end.min
+
+# puts "Part 1: #{result}"
 
 ##########
 # PART 2 #
 ##########
-
 def intersects?(range1, range2)
   range1.include?(range2.begin) || range1.include?(range2.end)
 end
@@ -313,7 +301,8 @@ def map(source, dest, range)
   (range.begin + diff .. range.end + diff)
 end
 
-seed_maps = seeds.each_slice(2).map { |start, size| (start .. start + size - 1) }
+part_1_seed_map = seeds.map { |seed| (seed .. seed) }
+part_2_seed_map = seeds.each_slice(2).map { |start, size| (start .. start + size - 1) }
 
 def find_in_large_map(seed_map, large_map)
   # SPLIT
@@ -355,14 +344,18 @@ def find_in_large_map(seed_map, large_map)
   end
 
   # OUTSIDE
-  return [seed_map]
+  [seed_map]
 end
 
-result = seed_maps.flat_map { |m| find_in_large_map(m, seed_to_soil) }
-                  .flat_map { |m| find_in_large_map(m, soil_to_fertilizer) }
-                  .flat_map { |m| find_in_large_map(m, fertilizer_to_water) }
-                  .flat_map { |m| find_in_large_map(m, water_to_light) }
-                  .flat_map { |m| find_in_large_map(m, light_to_temperature) }
-                  .flat_map { |m| find_in_large_map(m, temperature_to_humidity) }
-                  .flat_map { |m| find_in_large_map(m, humidity_to_location) }
-puts "Part 2: #{result.map(&:begin).min}"
+def solve(maps, seed_maps)
+  result = seed_maps
+
+  maps.each do |map|
+    result = result.flat_map { |m| find_in_large_map(m, map) }
+  end
+
+  result
+end
+
+puts "Part 1: #{solve(maps, part_1_seed_map).map(&:begin).min}"
+puts "Part 2: #{solve(maps, part_2_seed_map).map(&:begin).min}"
