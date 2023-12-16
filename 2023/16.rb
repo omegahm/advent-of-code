@@ -124,8 +124,8 @@ input = <<~INPUT.strip
 ...........................|.....--..................................-....\\...||-........./\\......-.....\\.\\...
 INPUT
 
-def solve(map, lasers)
-  energized = map.map { |line| line.map { { up: false, right: false, down: false, left: false } } }
+def solve(map, lasers, visual = false)
+  energized = map.map { |line| line.map { {} } }
 
   until lasers.empty?
     new_lasers = []
@@ -191,6 +191,30 @@ def solve(map, lasers)
     lasers = new_lasers.reject do |x, y, _|
       x < 0 || y < 0 || x >= map.first.size || y >= map.size
     end
+
+    if visual
+      print "\033[H"
+      map.each_with_index do |row, y|
+        row.each_with_index do |field, x|
+          if lasers.find { |laser| laser[0] == x && laser[1] == y }
+            print "\e[0;106mL\e[0m"
+          elsif energized[y][x].values.count(true) == 1
+            print "\e[0;30m\e[41m#{field}\e[0m"
+          elsif energized[y][x].values.count(true) == 2
+            print "\e[0;30m\e[42m#{field}\e[0m"
+          elsif energized[y][x].values.count(true) == 3
+            print "\e[0;30m\e[43m#{field}\e[0m"
+          elsif energized[y][x].values.count(true) == 4
+            print "\e[0;30m\e[44m#{field}\e[0m"
+          elsif energized[y][x].values.count(true) > 4
+            print "\e[0;30m\e[45m#{field}\e[0m"
+          else
+            print "\e[0;37m#{field}\e[0m"
+          end
+        end
+        puts
+      end
+    end
   end
 
   result = energized.map { |row| row.map { _1.values.count(true) }.join }
@@ -199,7 +223,7 @@ end
 
 map = input.lines.map { |line| line.chomp.chars }
 
-puts "Part 1: #{solve(map, [[0, 0, :right]])}"
+puts "Part 1: #{solve(map, [[0, 0, :right]], ENV["VISUAL"] == "true")}"
 
 laser_candidates = []
 map.each_with_index do |row, y|
