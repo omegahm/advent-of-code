@@ -14,7 +14,7 @@ input = <<~INPUT.strip
 4322674655533
 INPUT
 
-input = <<~INPUT.strip
+xinput = <<~INPUT.strip
 221132133212311232212242114141432412314342344414511125222353555313224255144252512523312445214535353432244331111334213433323123231313121233312
 112212122221212221323211422324232212343312251322531451424155421523333223554153341151413325324333253423134212341243431224144312132322221323221
 213313213322123132231341233221443443232132311221233553234412331241455332545534513324434532554435513521433123414411413332112232121311231333313
@@ -165,12 +165,13 @@ def solve(weights, mindist, maxdist)
   queue << [0, 0, 0, [-1, -1]]
   costs = {}
   seen = Set.new
+  path = {}
 
   until queue.empty?
     cost, x, y, direction = queue.pop
 
     # If the lowest cost in the queue is the bottom right corner, we are done.
-    return cost if y == weights.size - 1 && x == weights[y].size - 1
+    return cost, path if y == weights.size - 1 && x == weights[y].size - 1
 
     next if seen.include?([x, y, direction])
     seen << [x, y, direction]
@@ -191,6 +192,7 @@ def solve(weights, mindist, maxdist)
 
         new_cost = cost + increase
         next if costs.fetch([new_x, new_y, [dx, dy]], Float::INFINITY) <= new_cost
+        path[[new_x, new_y, [dx, dy]]] = [x, y, direction]
 
         costs[[new_x, new_y, [dx, dy]]] = new_cost
         queue << [new_cost, new_x, new_y, [dx, dy]]
@@ -199,12 +201,47 @@ def solve(weights, mindist, maxdist)
   end
 end
 
+def visualize(path, weights)
+  print "\e[?25l\e[2J\e[H"
+
+  weights.each { puts _1.join }
+
+  current = [weights[0].size - 1, weights.size - 1, [0, 1]]
+  actual_path = [current]
+
+  until current == [0, 0, [-1, -1]]
+    current = path[current]
+    actual_path << current.first(2)
+  end
+  actual_path.reverse!
+
+  last_x, last_y = 0, 0
+  actual_path.each do |x, y|
+    ([last_x, x].min+1).upto([last_x, x].max-1) do |a|
+      print "\e[#{y + 1};#{a + 1}f"
+      print "\e[0;30m\e[44m#{weights[y][a]}\e[0m"
+    end
+
+    ([last_y, y].min+1).upto([last_y, y].max-1) do |b|
+      print "\e[#{b + 1};#{x + 1}f"
+      print "\e[0;30m\e[44m#{weights[b][x]}\e[0m"
+    end
+
+    last_x, last_y = x, y
+    print "\e[#{y + 1};#{x + 1}f"
+    print "\e[0;30m\e[41m#{weights[y][x]}\e[0m"
+    sleep 0.1
+  end
+  puts "\e[#{weights.size};#{0}H\n\e[?25h"
+end
+
 weights = input.split("\n").map { _1.chars.map(&:to_i) }
 
-t = Time.now
-puts "Part 1: #{solve(weights, 1, 3)}"
-puts "Took #{Time.now - t}s"
+result1, path1 = solve(weights, 1, 3)
+visualize(path1, weights) if ENV["VISUAL"] == "1"
 
-t = Time.now
-puts "Part 2: #{solve(weights, 4, 10)}"
-puts "Took #{Time.now - t}s"
+result2, path2 = solve(weights, 4, 10)
+visualize(path2, weights) if ENV["VISUAL"] == "2"
+
+puts "Part 1: #{result1}"
+puts "Part 2: #{result2}"
