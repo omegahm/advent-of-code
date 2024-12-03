@@ -7,7 +7,19 @@ input = <<~INPUT.strip
 3   3
 INPUT
 
-input = <<~INPUT.strip
+input = DATA.read
+
+a, b = input.each_line.map do |line|
+  line.split("   ").map(&:to_i)
+end.transpose.map(&:sort)
+
+puts "Part 1"
+puts a.zip(b).map { |n, m| (n - m).abs }.sum
+
+puts "Part 2"
+puts a.map { b.count(_1) * _1 }.sum
+
+__END__
 27636   67663
 92436   51410
 68957   77912
@@ -1008,14 +1020,3 @@ input = <<~INPUT.strip
 61245   14960
 74434   46710
 21991   30826
-INPUT
-
-a, b = input.each_line.map do |line|
-  line.split("   ").map(&:to_i)
-end.transpose.map(&:sort)
-
-puts "Part 1"
-puts a.zip(b).map { |n, m| (n - m).abs }.sum
-
-puts "Part 2"
-puts a.map { b.count(_1) * _1 }.sum

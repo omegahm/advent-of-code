@@ -7,7 +7,26 @@ input = <<~INPUT.strip
 1 3 6 7 9
 INPUT
 
-input = <<~INPUT.strip
+input = DATA.read
+
+lines = input.split("\n").map { |line| line.split.map(&:to_i) }
+
+def check(line)
+  dir = line[0] - line[1] > 0 ? :> : :<
+  line.each_cons(2).all? { |a, b| a.send(dir, b) && (a - b).abs.between?(1, 3) }
+end
+
+puts "Part 1"
+result = lines.count { check(_1) }
+puts result
+
+puts "Part 2"
+result = lines.count do |line|
+  line.combination(line.size - 1).any? { check(_1) }
+end
+puts result
+
+__END__
 45 47 48 50 51 52 54 51
 23 26 27 30 30
 40 41 44 47 49 51 55
@@ -1008,21 +1027,3 @@ input = <<~INPUT.strip
 23 22 21 19 17 15 13
 72 73 75 77 78 80 81
 73 72 71 70 68 66
-INPUT
-
-lines = input.split("\n").map { |line| line.split.map(&:to_i) }
-
-def check(line)
-  dir = line[0] - line[1] > 0 ? :> : :<
-  line.each_cons(2).all? { |a, b| a.send(dir, b) && (a - b).abs.between?(1, 3) }
-end
-
-puts "Part 1"
-result = lines.count { check(_1) }
-puts result
-
-puts "Part 2"
-result = lines.count do |line|
-  line.combination(line.size - 1).any? { check(_1) }
-end
-puts result
