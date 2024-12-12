@@ -110,6 +110,22 @@ puts regions.sum { perimeter(_1) * area(_1) }
 puts "Part 2"
 puts regions.sum { sides(_1) * area(_1) }
 
+output = []
+regions.each do |region|
+  color_fg = "#{(rand * 255).to_i};#{(rand * 255).to_i};#{(rand * 255).to_i}"
+  color_bg = "#{(rand * 255).to_i};#{(rand * 255).to_i};#{(rand * 255).to_i}"
+
+  region.each do |(x, y)|
+    output[y] ||= []
+    output[y][x] = ""
+    output[y][x] << "\e[38;2;#{color_fg}m"
+    output[y][x] << "\e[48;2;#{color_bg}m"
+    output[y][x] << map[y][x]
+    output[y][x] << "\e[0m"
+  end
+end
+puts output.map(&:join).join("\n")
+
 __END__
 WWWWWWEEEEEEEEEEEEEEHHHHHHHHHHHGGGGGGGGGIIIIIIIIIEEIIIIIIIIIIIIIIIIGGGGGTCCCCCGGGGGGGGGTTDDDDDDTTTTTTTTTTTTTTTTTTUUUUUUUUUUUUUIIIIIIIIIIIIII
 WWWWWWEEEEEEEEEEEEHHHHHHHHHHHHHGGGGGGGIGIIIIIIIIIEIIIIIIIIIIIIIIIIIIGGGGTCCCCCGGGGGGGGGGTDDDDDDTTTTTTTTTTTTTTTTTTTUUUUUUUUUUUUIUIIIIIIIIIIII
