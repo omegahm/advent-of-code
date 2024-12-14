@@ -63,10 +63,10 @@ loop do
     [x, y, dx, dy]
   end
 
-  other_coords = coords.map { _1.first(2) }
+  other_coords = coords.each_with_object(Set.new) { |elem, set| set << elem.first(2) }
   if coords.any? { |(x, y, dx, dy)|
-    other_coords.include?([x+1, y]) && other_coords.include?([x+2, y]) && other_coords.include?([x+3, y]) && other_coords.include?([x+4, y]) &&
-    other_coords.include?([x, y+1]) && other_coords.include?([x, y+2]) && other_coords.include?([x, y+3]) && other_coords.include?([x, y+4])
+    other_coords.include?([x+1, y]) && other_coords.include?([x+2, y]) && other_coords.include?([x+3, y]) &&
+    other_coords.include?([x, y+1]) && other_coords.include?([x, y+2]) && other_coords.include?([x, y+3])
   }
     puts "Part 2"
     puts seconds
@@ -78,12 +78,12 @@ map = []
 height.times do |y|
   map[y] = []
   width.times do |x|
-    map[y][x] = "."
+    map[y][x] = " "
   end
 end
 
 coords.map do |(x, y, _dx, _dy)|
-  map[y][x] = "X"
+  map[y][x] = "\e[38;2;0;255;0mX\e[38;2;255;255;255m"
 end
 
 puts map.map(&:join).join("\n")
