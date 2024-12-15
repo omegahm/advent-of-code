@@ -255,6 +255,7 @@ map.each_with_index do |row, idx|
   end
 end
 
+print "\033c" if ENV['VISUALIZE']
 directions.each do |dir|
   map[y][x] = "."
 
@@ -313,7 +314,12 @@ directions.each do |dir|
     end
   end
 
-  map[y][x] = "@"
+  if ENV["VISUALIZE"]
+    map[y][x] = "\033[31m@\033[0m"
+    print "\033[H"
+    puts map.map(&:join).join("\n")
+    sleep 0.001
+  end
 end
 
 puts "Part 2"
