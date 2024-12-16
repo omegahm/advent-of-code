@@ -123,6 +123,58 @@ if ENV["VISUALIZE"]
   end
 end
 
+if ENV["IMAGE"]
+  require "rmagick"
+
+  SCALE = 8
+
+  height = map.size
+  width = map[0].size
+
+  data = Array.new(width) do |x|
+    Array.new(height) do |y|
+      case map[y][x]
+      when "#"
+        "black"
+      when "S", "E"
+        "blue"
+      when "."
+        "white"
+      end
+    end
+  end
+
+  img_list = Magick::ImageList.new
+  img = Magick::Image.new(SCALE*width, SCALE*height)
+
+  data.each_with_index do |row, y|
+    row.each_with_index do |color, x|
+      SCALE.times do |i|
+        SCALE.times do |j|
+          img.pixel_color(SCALE*y+i, SCALE*x+j, color)
+        end
+      end
+    end
+  end
+  img_list << img.dup
+
+  visited_tiles.each_with_index do |(x, y, _d), idx|
+    puts "Generating frame #{idx}" if idx % 20 == 0
+    SCALE.times do |i|
+      SCALE.times do |j|
+        img.pixel_color(SCALE*x+i, SCALE*y+j, "red")
+      end
+    end
+    img_list << img.dup
+  end
+
+  img_list.delay = 0
+  img_list.iterations = 0
+  img_list.write("16.gif")
+
+  `gifsicle -O3 --lossy=200 -o 16.gif 16.gif`
+end
+
 __END__
 #############################################################################################################################################
 #.............#.#.......#.....#.......#.....#.....#...#...#.............#...................#...#.........#.....#.....#...........#........E#
