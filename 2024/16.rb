@@ -39,98 +39,82 @@ INPUT
 require "rb_heap"
 
 input = DATA.read
-map = input.split("\n")
+map = input.split("\n").map(&:chars)
 
 graph = {}
 dist = {}
 paths = {}
-start, stop = [nil, nil]
+startx, starty, stopx, stopy = nil
 queue = Heap.new { |a, b| a[0] < b[0] }
 
 map.each_with_index do |row, y|
-  row.chars.each_with_index do |elem, x|
+  row.each_with_index do |elem, x|
     if elem == "S"
-      start = [x, y]
+      startx, starty = [x, y]
     elsif elem == "E"
-      stop = [x, y]
+      stopx, stopy = [x, y]
     end
 
     if ".SE".include?(elem)
-      dist[[x, y, "H"]] = Float::INFINITY
-      dist[[x, y, "V"]] = Float::INFINITY
-
-      paths[[x, y, "H"]] = nil
-      paths[[x, y, "V"]] = nil
-
       graph[[x, y, "H"]] = [[x, y, "V", 1000]]
       graph[[x, y, "V"]] = [[x, y, "H", 1000]]
 
-      if x > 0 && ".SE".include?(row[x-1])
-        graph[[x, y, "H"]] << [x-1, y, "H", 1]
-      end
-
-      if x < row.size - 1 && ".SE".include?(row[x+1])
-        graph[[x, y, "H"]] << [x+1, y, "H", 1]
-      end
-
-      if y > 0 && ".SE".include?(map[y-1][x])
-        graph[[x, y, "V"]] << [x, y-1, "V", 1]
-      end
-
-      if y < map.size - 1 && ".SE".include?(map[y+1][x])
-        graph[[x, y, "V"]] << [x, y+1, "V", 1]
-      end
+      graph[[x, y, "H"]] << [x-1, y, "H", 1] if x > 0 && ".SE".include?(row[x-1])
+      graph[[x, y, "H"]] << [x+1, y, "H", 1] if x < row.size - 1 && ".SE".include?(row[x+1])
+      graph[[x, y, "V"]] << [x, y-1, "V", 1] if y > 0 && ".SE".include?(map[y-1][x])
+      graph[[x, y, "V"]] << [x, y+1, "V", 1] if y < map.size - 1 && ".SE".include?(map[y+1][x])
     end
   end
 end
 
-dist[[start[0], start[1], "H"]] = 0
-
-queue << [0, start[0], start[1], "H"]
+dist[[startx, starty, "H"]] = 0
+queue << [0, startx, starty, "H"]
 
 until queue.empty?
   cost, *node = queue.pop
 
-  graph[node].each do |neighbour|
-    alt = cost + neighbour.last
+  graph[node].each do |(nx, ny, ndirection, ncost)|
+    alt = cost + ncost
+    neighbour_node = [nx, ny, ndirection]
 
-    if alt < dist[neighbour[0..2]]
-      dist[neighbour[0..2]] = alt
-      paths[neighbour[0..2]] = [node]
-      queue << [alt, neighbour[0], neighbour[1], neighbour[2]]
-    elsif alt == dist[neighbour[0..2]]
-      paths[neighbour[0..2]] << node
+    if alt < dist.fetch(neighbour_node, Float::INFINITY)
+      dist[neighbour_node] = alt
+      paths[neighbour_node] = [node]
+      queue << [alt, *neighbour_node]
+    elsif alt == dist[neighbour_node]
+      paths[neighbour_node] << node
     end
   end
 end
 
 puts "Part 1"
-puts [dist[[stop[0], stop[1], "H"]], dist[[stop[0], stop[1], "V"]]].min
+puts [dist[[stopx, stopy, "H"]], dist[[stopx, stopy, "V"]]].min
 
-current = if dist[[stop[0], stop[1], "H"]] > dist[[stop[0], stop[1], "V"]]
-  [stop[0], stop[1], "V"]
+stop_tile = if dist[[stopx, stopy, "H"]] > dist[[stopx, stopy, "V"]]
+  [stopx, stopy, "V"]
 else
-  [stop[0], stop[1], "H"]
+  [stopx, stopy, "H"]
 end
 
-def visit_tile(current, visited_tiles, paths, start)
-  return if current == [start[0], start[1], "H"]
+def visit_tile(current, visited_tiles, paths, startx, starty)
+  return if current == [startx, starty, "H"]
 
   next_tiles = paths[current]
   next_tiles.each do |tile|
-    visit_tile(tile, visited_tiles, paths, start)
+    visit_tile(tile, visited_tiles, paths, startx, starty)
     visited_tiles << tile[0..1]
   end
 end
 
 visited_tiles = Set.new
-visit_tile(current, visited_tiles, paths, start)
+visit_tile(stop_tile, visited_tiles, paths, startx, starty)
+
 puts "Part 2"
 puts visited_tiles.count + 1
 
 if ENV["VISUALIZE"]
   puts "\033c"
-  map = map.map(&:chars)
+
   visited_tiles.each do |(x, y, _d)|
     print "\033[H"
     map[y][x] = "\e[38;2;255;0;0m@\e[0m"
