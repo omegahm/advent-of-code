@@ -255,8 +255,19 @@ map.each_with_index do |row, idx|
   end
 end
 
+if ENV["IMAGE"]
+  require "rmagick"
+
+  SCALE = 1
+
+  img_list = Magick::ImageList.new
+
+  height = map.size
+  width = map[0].size
+end
+
 print "\033c" if ENV['VISUALIZE']
-directions.each do |dir|
+directions.each_with_index do |dir, idx_dir|
   map[y][x] = "."
 
   case dir
@@ -320,6 +331,41 @@ directions.each do |dir|
     puts map.map(&:join).join("\n")
     sleep 0.001
   end
+
+  if ENV["IMAGE"]
+    print "\33[2K\rGenerating animation: #{((idx_dir+1).fdiv(directions.size) * 100).round(1)}% done..."
+    img = Magick::Image.new(SCALE*width, SCALE*height)
+
+    map[y][x] = "@"
+    map.each_with_index do |row, y|
+      row.each_with_index do |elem, x|
+        SCALE.times do |i|
+          SCALE.times do |j|
+            color = case elem
+            when "@" then "red"
+            when "." then "white"
+            when "#" then "black"
+            when "[" then "blue"
+            when "]" then "blue"
+            end
+
+            img.pixel_color(SCALE*x+i, SCALE*y+j, color)
+          end
+        end
+      end
+    end
+
+    img_list << img
+  end
+end
+
+if ENV["IMAGE"]
+  puts
+  img_list.delay = 0
+  img_list.iterations = 0
+  img_list.write("15.gif")
+
+  `gifsicle -O3 --lossy=200 -o 15.gif 15.gif`
 end
 
 puts "Part 2"
