@@ -159,20 +159,22 @@ if ENV["IMAGE"]
   img_list << img.dup
 
   visited_tiles.each_with_index do |(x, y, _d), idx|
-    puts "Generating frame #{idx}" if idx % 20 == 0
+    print "\33[2K\rGenerating animation: #{((idx+1).fdiv(visited_tiles.size) * 100).round(1)}% done..."
     SCALE.times do |i|
       SCALE.times do |j|
         img.pixel_color(SCALE*x+i, SCALE*y+j, "red")
       end
     end
-    img_list << img.dup
+    img_list << img.dup if idx % 4 == 0
   end
 
-  img_list.delay = 0
-  img_list.iterations = 0
-  img_list.write("16.gif")
+  image_name = "16-fast.gif"
 
-  `gifsicle -O3 --lossy=200 -o 16.gif 16.gif`
+  puts "\nWriting #{image_name}..."
+  img_list.write(image_name)
+
+  puts "Optimizing #{image_name}..."
+  `gifsicle --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
 end
 
 __END__

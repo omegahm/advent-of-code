@@ -333,22 +333,23 @@ directions.each_with_index do |dir, idx_dir|
   end
 
   if ENV["IMAGE"]
+    next unless idx_dir % 16 == 0
+
     print "\33[2K\rGenerating animation: #{((idx_dir+1).fdiv(directions.size) * 100).round(1)}% done..."
     img = Magick::Image.new(SCALE*width, SCALE*height)
 
     map[y][x] = "@"
     map.each_with_index do |row, y|
       row.each_with_index do |elem, x|
+        color = case elem
+        when "@" then "red"
+        when "." then "white"
+        when "#" then "black"
+        when "[", "]" then "blue"
+        end
+
         SCALE.times do |i|
           SCALE.times do |j|
-            color = case elem
-            when "@" then "red"
-            when "." then "white"
-            when "#" then "black"
-            when "[" then "blue"
-            when "]" then "blue"
-            end
-
             img.pixel_color(SCALE*x+i, SCALE*y+j, color)
           end
         end
@@ -360,12 +361,13 @@ directions.each_with_index do |dir, idx_dir|
 end
 
 if ENV["IMAGE"]
-  puts
-  img_list.delay = 0
-  img_list.iterations = 0
-  img_list.write("15.gif")
+  image_name = "15-fast.gif"
 
-  `gifsicle -O3 --lossy=200 -o 15.gif 15.gif`
+  puts "\nWriting #{image_name}..."
+  img_list.write(image_name)
+
+  puts "Optimizing #{image_name}..."
+  `gifsicle --scale=16 --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
 end
 
 puts "Part 2"
