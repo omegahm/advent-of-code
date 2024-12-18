@@ -126,8 +126,6 @@ end
 if ENV["IMAGE"]
   require "rmagick"
 
-  SCALE = 8
-
   height = map.size
   width = map[0].size
 
@@ -145,36 +143,28 @@ if ENV["IMAGE"]
   end
 
   img_list = Magick::ImageList.new
-  img = Magick::Image.new(SCALE*width, SCALE*height)
+  img = Magick::Image.new(width, height)
 
   data.each_with_index do |row, y|
     row.each_with_index do |color, x|
-      SCALE.times do |i|
-        SCALE.times do |j|
-          img.pixel_color(SCALE*y+i, SCALE*x+j, color)
-        end
-      end
+      img.pixel_color(y, x, color)
     end
   end
   img_list << img.dup
 
   visited_tiles.each_with_index do |(x, y, _d), idx|
-    print "\33[2K\rGenerating animation: #{((idx+1).fdiv(visited_tiles.size) * 100).round(1)}% done..."
-    SCALE.times do |i|
-      SCALE.times do |j|
-        img.pixel_color(SCALE*x+i, SCALE*y+j, "red")
-      end
-    end
-    img_list << img.dup if idx % 4 == 0
+    print "\33[2K\rGenerating animation: #{((idx+1).fdiv(visited_tiles.size) * 100).round(1)}% done (#{visited_tiles.size} frames)..."
+    img.pixel_color(x, y, "red")
+    img_list << img.dup
   end
 
-  image_name = "16-fast.gif"
+  image_name = "16.gif"
 
   puts "\nWriting #{image_name}..."
   img_list.write(image_name)
 
   puts "Optimizing #{image_name}..."
-  `gifsicle --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
+  `gifsicle --scale=8 --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
 end
 
 __END__

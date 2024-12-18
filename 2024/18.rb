@@ -113,8 +113,6 @@ if ENV["IMAGE"]
     map[y][x] = "#"
   end
 
-  SCALE = 8
-
   height = map.size
   width = map[0].size
 
@@ -132,26 +130,18 @@ if ENV["IMAGE"]
   end
 
   img_list = Magick::ImageList.new
-  img = Magick::Image.new(SCALE*(width+2), SCALE*(height+2))
+  img = Magick::Image.new(width + 2, height + 2)
 
   data.each_with_index do |row, y|
     row.each_with_index do |color, x|
-      SCALE.times do |i|
-        SCALE.times do |j|
-          img.pixel_color(SCALE*y+i, SCALE*x+j, color)
-        end
-      end
+      img.pixel_color(y, x, color)
     end
   end
   img_list << img.dup
 
   path.reverse.each_with_index do |(x, y), idx|
-    print "\33[2K\rGenerating animation: #{((idx+1).fdiv(path.size) * 100).round(1)}% done..."
-    SCALE.times do |i|
-      SCALE.times do |j|
-        img.pixel_color(SCALE*x+i+SCALE, SCALE*y+j+SCALE, "red")
-      end
-    end
+    print "\33[2K\rGenerating animation: #{((idx+1).fdiv(path.size) * 100).round(1)}% done (#{idx+1} frames)..."
+      img.pixel_color(x+1, y+1, "red")
     img_list << img.dup
   end
 
@@ -161,7 +151,7 @@ if ENV["IMAGE"]
   img_list.write(image_name)
 
   puts "Optimizing #{image_name}..."
-  `gifsicle --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
+  `gifsicle --scale=8 --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
 end
 
 __END__

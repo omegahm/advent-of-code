@@ -258,8 +258,6 @@ end
 if ENV["IMAGE"]
   require "rmagick"
 
-  SCALE = 1
-
   img_list = Magick::ImageList.new
 
   height = map.size
@@ -336,7 +334,7 @@ directions.each_with_index do |dir, idx_dir|
     next unless idx_dir % 16 == 0
 
     print "\33[2K\rGenerating animation: #{((idx_dir+1).fdiv(directions.size) * 100).round(1)}% done..."
-    img = Magick::Image.new(SCALE*width, SCALE*height)
+    img = Magick::Image.new(width, height)
 
     map[y][x] = "@"
     map.each_with_index do |row, y|
@@ -348,11 +346,7 @@ directions.each_with_index do |dir, idx_dir|
         when "[", "]" then "blue"
         end
 
-        SCALE.times do |i|
-          SCALE.times do |j|
-            img.pixel_color(SCALE*x+i, SCALE*y+j, color)
-          end
-        end
+        img.pixel_color(x, y, color)
       end
     end
 
