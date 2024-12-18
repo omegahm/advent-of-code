@@ -61,6 +61,8 @@ def shortest_path(input, bytes, height, width, part: 1)
   dist[[0, 0]] = 0
   queue << [0, 0, 0]
 
+  paths = {} if ENV["IMAGE"] && part == 1
+
   until queue.empty?
     cost, *node = queue.pop
 
@@ -69,16 +71,18 @@ def shortest_path(input, bytes, height, width, part: 1)
 
       if alt < dist.fetch(neighbour, Float::INFINITY)
         dist[neighbour] = alt
+        paths[neighbour] = node if ENV["IMAGE"] && part == 1
         queue << [alt, *neighbour]
       end
     end
   end
 
+  return paths if ENV["IMAGE"] && part == 1
   return dist if part == 1
   dist[[width - 1, height - 1]].nil?
 end
 
-dist = shortest_path(input, data_size, height, width, part: 1)
+dist = shortest_path(input, data_size, height, width)
 
 puts "Part 1"
 puts dist[[width - 1, height - 1]]
@@ -89,6 +93,75 @@ end
 
 puts "Part 2"
 puts input[index-1]
+
+if ENV["IMAGE"]
+  require "rmagick"
+
+  paths = shortest_path(input, index-1, height, width)
+
+  path = []
+  current = [width - 1, height - 1]
+  until current.nil?
+    path << current
+    current = paths[current]
+  end
+
+  map = height.times.map { |y| Array.new(width, ".") }
+
+  input.take(index-1).each do |line|
+    x, y = line.split(",").map(&:to_i)
+    map[y][x] = "#"
+  end
+
+  SCALE = 8
+
+  height = map.size
+  width = map[0].size
+
+  # Adding 2 to add a black border
+  data = Array.new(width+2) do |x|
+    Array.new(height+2) do |y|
+      if x == 0 || y == 0 || x == width+1 || y == height+1
+        "black"
+      elsif map[y-1][x-1] == "#"
+        "black"
+      elsif map[y-1][x-1] == "."
+        "white"
+      end
+    end
+  end
+
+  img_list = Magick::ImageList.new
+  img = Magick::Image.new(SCALE*(width+2), SCALE*(height+2))
+
+  data.each_with_index do |row, y|
+    row.each_with_index do |color, x|
+      SCALE.times do |i|
+        SCALE.times do |j|
+          img.pixel_color(SCALE*y+i, SCALE*x+j, color)
+        end
+      end
+    end
+  end
+  img_list << img.dup
+
+  path.reverse.each_with_index do |(x, y), idx|
+    print "\33[2K\rGenerating animation: #{((idx+1).fdiv(path.size) * 100).round(1)}% done..."
+    SCALE.times do |i|
+      SCALE.times do |j|
+        img.pixel_color(SCALE*x+i+SCALE, SCALE*y+j+SCALE, "red")
+      end
+    end
+    img_list << img.dup
+  end
+
+  img_list.delay = 0
+  img_list.iterations = 0
+  img_list.write("18.gif")
+
+  puts "Optimizing gif..."
+  `gifsicle -O3 --lossy=200 -o 18.gif 18.gif`
+end
 
 __END__
 54,47
