@@ -155,12 +155,11 @@ if ENV["IMAGE"]
     img_list << img.dup
   end
 
-  img_list.delay = 0
-  img_list.iterations = 0
+  puts "\nWriting gif..."
   img_list.write("18.gif")
 
   puts "Optimizing gif..."
-  `gifsicle -O3 --lossy=200 -o 18.gif 18.gif`
+  `gifsicle --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=18.gif 18.gif`
 end
 
 __END__
