@@ -110,21 +110,50 @@ puts regions.sum { perimeter(_1) * area(_1) }
 puts "Part 2"
 puts regions.sum { sides(_1) * area(_1) }
 
-output = []
-regions.each do |region|
-  color_fg = "#{(rand * 255).to_i};#{(rand * 255).to_i};#{(rand * 255).to_i}"
-  color_bg = "#{(rand * 255).to_i};#{(rand * 255).to_i};#{(rand * 255).to_i}"
+if ENV["VISUALIZE"]
+  output = []
+  regions.each do |region|
+    color_fg = "#{(rand * 255).to_i};#{(rand * 255).to_i};#{(rand * 255).to_i}"
+    color_bg = "#{(rand * 255).to_i};#{(rand * 255).to_i};#{(rand * 255).to_i}"
 
-  region.each do |(x, y)|
-    output[y] ||= []
-    output[y][x] = ""
-    output[y][x] << "\e[38;2;#{color_fg}m"
-    output[y][x] << "\e[48;2;#{color_bg}m"
-    output[y][x] << map[y][x]
-    output[y][x] << "\e[0m"
+    region.each do |(x, y)|
+      output[y] ||= []
+      output[y][x] = ""
+      output[y][x] << "\e[38;2;#{color_fg}m"
+      output[y][x] << "\e[48;2;#{color_bg}m"
+      output[y][x] << map[y][x]
+      output[y][x] << "\e[0m"
+    end
   end
+  puts output.map(&:join).join("\n")
 end
-puts output.map(&:join).join("\n")
+
+if ENV["IMAGE"]
+  require "rmagick"
+
+  SCALE = 16
+
+  img = Magick::Image.new(SCALE * map[0].size, SCALE * map.size)
+
+  regions.each do |region|
+    color = Magick::Pixel.from_hsla(
+      (360 * rand).to_i, # hue
+      128, # saturation
+      128 # lightness
+    )
+
+    region.each do |(x, y)|
+      SCALE.times do |i|
+        SCALE.times do |j|
+          img.pixel_color(SCALE * x + i, SCALE * y + j, color)
+        end
+      end
+    end
+  end
+
+  image_name = "12.png"
+  img.write(image_name)
+end
 
 __END__
 WWWWWWEEEEEEEEEEEEEEHHHHHHHHHHHGGGGGGGGGIIIIIIIIIEEIIIIIIIIIIIIIIIIGGGGGTCCCCCGGGGGGGGGTTDDDDDDTTTTTTTTTTTTTTTTTTUUUUUUUUUUUUUIIIIIIIIIIIIII
