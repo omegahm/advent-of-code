@@ -19,20 +19,20 @@ patterns = patterns.split("\n")
 
 def combinations(towels, target_pattern)
   relevant_towels = towels.select { target_pattern.include?(_1) }
-  dp = [1]
+  dp = Hash.new(0)
+  dp[0] = 1
 
   (1..target_pattern.size).each do |i|
     relevant_towels.each do |pattern|
       next if i < pattern.size
 
       if target_pattern[i - pattern.size...i] == pattern
-        dp[i] ||= 0
-        dp[i] += dp[i - pattern.size] || 0
+        dp[i] += dp[i - pattern.size]
       end
     end
   end
 
-  dp[target_pattern.size]
+  dp.fetch(target_pattern.size, nil)
 end
 
 towel_combinations = patterns.map { combinations(towels, _1) }.compact

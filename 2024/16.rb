@@ -42,7 +42,7 @@ input = DATA.read
 map = input.split("\n").map(&:chars)
 
 graph = {}
-dist = {}
+dist = Hash.new(Float::INFINITY)
 paths = {}
 startx, starty, stopx, stopy = nil
 queue = Heap.new { |a, b| a[0] < b[0] }
@@ -77,7 +77,7 @@ until queue.empty?
     alt = cost + ncost
     neighbour_node = [nx, ny, ndirection]
 
-    if alt < dist.fetch(neighbour_node, Float::INFINITY)
+    if alt < dist[neighbour_node]
       dist[neighbour_node] = alt
       paths[neighbour_node] = [node]
       queue << [alt, *neighbour_node]

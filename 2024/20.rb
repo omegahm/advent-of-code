@@ -21,7 +21,7 @@ require "rb_heap"
 input = DATA.read
 map = input.split("\n").map(&:chars)
 
-graph = {}
+graph = Hash.new { |h, k| h[k] = [] }
 startx, starty, stopx, stopy = nil
 
 map.each_with_index do |row, y|
@@ -33,7 +33,6 @@ map.each_with_index do |row, y|
     end
 
     if ".SE".include?(elem)
-      graph[[x, y]] ||= []
       graph[[x, y]] << [x-1, y] if x > 0 && ".SE".include?(row[x-1])
       graph[[x, y]] << [x+1, y] if x < row.size - 1 && ".SE".include?(row[x+1])
       graph[[x, y]] << [x, y-1] if y > 0 && ".SE".include?(map[y-1][x])
@@ -43,7 +42,7 @@ map.each_with_index do |row, y|
 end
 
 def shortest_path(graph, startx, starty)
-  dist = {}
+  dist = Hash.new(Float::INFINITY)
   paths = {}
 
   queue = Heap.new { |a, b| a[0] < b[0] }
@@ -58,7 +57,7 @@ def shortest_path(graph, startx, starty)
       alt = cost + 1
       neighbour_node = [nx, ny]
 
-      if alt < dist.fetch(neighbour_node, Float::INFINITY)
+      if alt < dist[neighbour_node]
         dist[neighbour_node] = alt
         paths[neighbour_node] = node
         queue << [alt, *neighbour_node]
