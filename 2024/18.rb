@@ -113,9 +113,6 @@ if ENV["IMAGE"]
     map[y][x] = "#"
   end
 
-  height = map.size
-  width = map[0].size
-
   # Adding 2 to add a black border
   data = Array.new(width+2) do |x|
     Array.new(height+2) do |y|
@@ -141,7 +138,7 @@ if ENV["IMAGE"]
 
   path.reverse.each_with_index do |(x, y), idx|
     print "\33[2K\rGenerating animation: #{((idx+1).fdiv(path.size) * 100).round(1)}% done (#{idx+1} frames)..."
-      img.pixel_color(x+1, y+1, "red")
+    img.pixel_color(x+1, y+1, "red")
     img_list << img.dup
   end
 
