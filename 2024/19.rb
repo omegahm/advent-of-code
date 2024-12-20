@@ -17,26 +17,6 @@ towels, patterns = input.split("\n\n")
 towels = towels.split(', ')
 patterns = patterns.split("\n")
 
-def valid?(towels, target_pattern)
-  relevant_towels = towels.select { target_pattern.include?(_1) }
-  checks = [true]
-
-  (1..target_pattern.size).each do |i|
-    relevant_towels.each do |pattern|
-      next if i < pattern.size
-
-      if target_pattern[i - pattern.size...i] == pattern
-        checks[i] ||= checks[i - pattern.size]
-      end
-    end
-  end
-
-  checks[target_pattern.size]
-end
-
-puts "Part 1"
-puts patterns.count { valid?(towels, _1) }
-
 def combinations(towels, target_pattern)
   relevant_towels = towels.select { target_pattern.include?(_1) }
   dp = [1]
@@ -46,16 +26,22 @@ def combinations(towels, target_pattern)
       next if i < pattern.size
 
       if target_pattern[i - pattern.size...i] == pattern
-        dp[i] = (dp[i] ||= 0) + (dp[i - pattern.size] ||= 0)
+        dp[i] ||= 0
+        dp[i] += dp[i - pattern.size] || 0
       end
     end
   end
 
-  dp[target_pattern.size] || 0
+  dp[target_pattern.size]
 end
 
+towel_combinations = patterns.map { combinations(towels, _1) }.compact
+
+puts "Part 1"
+puts towel_combinations.count
+
 puts "Part 2"
-puts patterns.sum { combinations(towels, _1) }
+puts towel_combinations.sum
 
 __END__
 wwb, bwwrw, wbr, ub, uubwuwg, gwgg, uuw, rbr, bgurbgub, gbubwru, uugwww, rgr, rw, gr, gw, rur, buuw, gwugw, bgbb, wgb, uwu, ubb, ggrbr, wuuwg, wub, gurr, bugg, ruruub, guw, bguugrg, uwgr, wggb, bw, uuu, ggwb, uwbwur, grb, r, ruwu, ubw, rgg, bwguw, ggu, ruw, gb, grr, uruwr, wuwww, gww, wrgwuu, bgrwru, rr, bwr, rgb, bwb, bur, bbrw, rrwb, gwr, w, wgrrw, rwub, gguruuuw, uur, rrrbbrwb, urb, ubwr, uggwgw, buwgu, wrbwru, wru, wwuwubub, bugbbbub, bwubbr, gbu, ggwr, ggbugu, uuug, wgbw, buurbw, rwww, gwbg, wurw, rrrru, wwggbgr, uubr, bgrr, bwgb, uuuug, wg, wwwu, wbgbgwb, guu, gbbwu, uurgw, gwbuu, uwrbug, rrwbrugg, ubbb, uwr, rrbbbw, wbuw, wugwrb, rguru, ugub, buw, wwruwb, wgbrb, rgw, bgb, rrur, b, bub, rubuguw, brgwg, br, wrw, brbrwg, uwrg, guwb, guubwu, uurg, wgugrwbg, gg, wgubwggu, urw, wbuu, gggr, uwgbwrrr, guwwg, uuwb, bwww, gub, rwgbg, uwugr, gbrb, urr, rwr, bruww, uw, wbwuguu, ugg, rug, wwggu, rwbb, ur, wwr, bgw, bbwrgw, rgbwug, bggug, bbru, wgugb, rbw, rbburw, rwrwr, bbgb, rwb, wu, bgg, gbrwwrur, wgwg, rbbgb, ubuwb, gubbb, rbu, urubggr, wbgbg, brr, wwu, wgug, gwu, uru, urgb, uggbugw, bggrr, rg, wbrrb, bwrw, ubg, uub, gwubwuu, rrrrr, guru, bg, wgw, wguug, bruuuu, rub, ggbgr, grgrwgw, gggurbgw, brwrgg, bb, rrww, uruwrrug, brbr, grggwr, rgwbw, bbrubb, brrw, bbuurwb, rwggbww, uwurggg, wur, brrwru, rrgwr, gurrb, brgggw, wbgwb, ggr, gwbww, wbg, rwg, wguu, wuggr, gur, ubr, bwg, gu, rgrb, wrgr, wwbuwww, gbg, wrr, rburgu, ug, rubu, bbw, rggwb, gbw, wrg, gggwbur, brg, wbubbu, bu, uuwr, rgbwrbu, gwgr, rwgbgg, gbrr, wuu, bbgr, gbgrwgr, wggbbw, bgr, bwubg, uurbbgr, uug, ru, wgu, uuruggg, ubrubu, wgrr, rgwubb, rgwuu, wgg, gbbgwr, uwb, rubgbrgr, brgu, rbbgru, uwuwwg, ggb, bwwru, gbgu, wuw, buubug, brruww, ururbwru, ubbrwu, bru, rbrbr, rrr, wuub, rwu, gubwrgg, ubrbbug, urg, rguug, wbrwb, wrbrg, rbg, urbuwr, wrbww, brw, gru, rrb, urgbbw, wugw, ggub, wwg, bgbwb, wbgg, bubgr, wug, ggwbuuu, rrg, rrw, wuugbrg, bubuw, ugwgwr, brurwb, rggu, uwrr, rbrru, wrb, rrbbwr, rgru, wrgw, wwuw, bug, buruw, buug, bbb, bbwr, ugu, bbu, gwgrr, ugbubg, ggg, gwgwbu, grg, bwu, wugg, wrbu, ubu, wgr, gwrrur, brb, uuggub, wuwbu, wwrbr, ubgu, ggwbr, rurugw, ubrbr, rww, gwbgwwww, rrbb, ugbg, grwwb, gbr, ww, uwbbugb, ubgw, urwr, uuwugg, wwgu, wbrgwg, uwgu, rgwrwurr, wrwbwwr, ugr, urbgg, wuwu, rwguww, wrubg, wurg, wwbwb, rwuwurwg, g, wr, rbb, rgu, bwug, ugw, uwbgw, rgrwu, uwruub, brbrb, gurwr, wwguubw, gwg, wruur, rgwr, urbuubr, ruwguru, gwubr, gwgw, uuguu, brgruw, burrrru, bbwu, rggg, wbrb, brug, uww, guur, grw, bbgub, wrwr, rru, wwbbr, gubwrbrg, gug, ugb, bbrwru, bgwuwb, wbgb, gwrgbr, wgggrbg, grbgg, rrbbu, uwbr, bbg, wggbwr, rgrbbgr, bwrrww, wgbb, wbb, uruwbwr, gwbbwwr, wbw, ubbrbgw, wubrugrr, rrggu, bgu, urbw, grbu, gugru, bbrrbb, wubrrgbr, gwb, bww, gwuu, gwuuurw, rwuubbr, gbgbr, urwubww, rrburb, buwr, gbb, uggu, ruug, rgrrugu, guug, ubgrwu, grgwgrg, grbww, wbu, rwuu, gbur, wrwgw, bbr, rb, uwggb
