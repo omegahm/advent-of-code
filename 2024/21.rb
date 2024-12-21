@@ -213,31 +213,34 @@ $cache = {}
 
 def solve(codes, robots)
   codes.sum do |code|
+    # Move through the numpad
     current = "A"
     moves = code.chars.map do |char|
-      $numpad[current][char].tap do |n|
+      $numpad[current][char].tap do
         current = char
       end
     end.join
 
-    code.scan(/\d+/)[0].to_i * min_size(moves, robots-1)
+    # Find minimum size and compute result
+    code.scan(/\d+/)[0].to_i * min_size(moves, robots)
   end
 end
 
 def min_size(code, robots, depth = 0)
-  key = [code, robots, depth]
+  # Return code size if we reached the last robot
+  return code.size if depth == robots
 
-  $cache[key] ||= begin
+  # CACHE!!
+  $cache[[code, robots, depth]] ||= begin
+    # We always start at "A"
     current = "A"
 
+    # Move through the keypad and sum the result for each character
     code.chars.sum do |char|
-      moves = $keypad[current][char]
-      current = char
-
-      if depth == robots
-        moves.size
-      else
-        min_size(moves, robots, depth + 1)
+      # Calculate the minimum result for the next robot
+      min_size($keypad[current][char], robots, depth + 1).tap do
+        # Set next character
+        current = char
       end
     end
   end
