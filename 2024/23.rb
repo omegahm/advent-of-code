@@ -61,15 +61,15 @@ puts "Part 1"
 puts threes.size
 
 def clique?(groups, nodes)
-  nodes.product(nodes).all? do |a, b|
-    a == b || groups[a].include?(b)
+  nodes.combination(2).all? do |(a, b)|
+    groups[a].include?(b)
   end
 end
 
 def largest_clique_with_node(groups, node)
   groups[node].size.downto(1) do |size|
     groups[node].combination(size) do |clique|
-      return clique if clique?(groups, [node] + clique)
+      return clique if clique?(groups, [node, *clique])
     end
   end
 
