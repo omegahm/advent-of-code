@@ -111,41 +111,29 @@ def solve(equations, values)
   values
 end
 
-result = solve(equations, values)
-
 puts "Part 1"
-puts result.select { _1.start_with?("z") }.sort_by { _1 }.reverse.map { _2 }.join.to_i(2)
+result = solve(equations, values).sort_by { _1 }.reverse.to_h
+puts result.select { _1.start_with?("z") }.map { _2 }.join.to_i(2)
 
 # Found by looking at Graphviz output
 # z09, gbf, z30, nbf, z05, hdt, mht, jgt
-equations.map! do |eq|
-  a, op, b, output = eq
+equations.map! do |(a, op, b, output)|
+  output = {
+    "z09" => "gbf",
+    "gbf" => "z09",
+    "z30" => "nbf",
+    "nbf" => "z30",
+    "z05" => "hdt",
+    "hdt" => "z05",
+    "mht" => "jgt",
+    "jgt" => "mht",
+  }.fetch(output, output)
 
-  if output == "z09"
-    [a, op, b, "gbf"]
-  elsif output == "gbf"
-    [a, op, b, "z09"]
-  elsif output == "z30"
-    [a, op, b, "nbf"]
-  elsif output == "nbf"
-    [a, op, b, "z30"]
-  elsif output == "z05"
-    [a, op, b, "hdt"]
-  elsif output == "hdt"
-    [a, op, b, "z05"]
-  elsif output == "mht"
-    [a, op, b, "jgt"]
-  elsif output == "jgt"
-    [a, op, b, "mht"]
-  else
-    eq
-  end
+  [a, op, b, output]
 end
 
-puts "Part 2"
-puts "\n"
-puts "digraph {"
-puts "  splines=line;"
+puts "\ndigraph {"
+
 equations.each do |(a, op, b, output)|
   puts "  #{a} [style=filled, fillcolor=red]" if a.start_with?("x")
   puts "  #{b} [style=filled, fillcolor=red]" if b.start_with?("x")
@@ -155,10 +143,10 @@ equations.each do |(a, op, b, output)|
 
   puts "  #{output} [style=filled, fillcolor=green]" if output.start_with?("z")
 
-  puts "  #{a} [shape=circle];"
-  puts "  #{b} [shape=circle];"
-  puts "  #{a}_#{op}_#{b} [shape=circle, label=\"#{op}\"];"
-  puts "  #{output} [shape=circle];"
+  puts "  #{a} [shape=square, fixedsize=true, width=.75, height=.75];"
+  puts "  #{b} [shape=square, fixedsize=true, width=.75, height=.75];"
+  puts "  #{a}_#{op}_#{b} [shape=square, fixedsize=true, width=.75, height=.75, label=\"#{op}\"];"
+  puts "  #{output} [shape=square, fixedsize=true, width=.75, height=.75];"
 
   puts "  #{a} -> #{a}_#{op}_#{b};"
   puts "  #{b} -> #{a}_#{op}_#{b};"
@@ -167,20 +155,37 @@ end
 puts "}"
 puts "\n"
 
-puts result.select { _1.start_with?("x") }.sort_by { _1 }.reverse.map { _2 }.join
-puts "+"
-puts result.select { _1.start_with?("y") }.sort_by { _1 }.reverse.map { _2 }.join
-puts "="
-puts result.select { _1.start_with?("z") }.sort_by { _1 }.reverse.map { _2 }.join
-puts "\n---\n\n"
-puts result.select { _1.start_with?("x") }.sort_by { _1 }.reverse.map { _2 }.join.to_i(2)
-puts "+"
-puts result.select { _1.start_with?("y") }.sort_by { _1 }.reverse.map { _2 }.join.to_i(2)
-puts "="
-puts result.select { _1.start_with?("z") }.sort_by { _1 }.reverse.map { _2 }.join.to_i(2)
-puts ""
+result = solve(equations, values).sort_by { _1 }.reverse.to_h
+x = result.select { _1.start_with?("x") }.map { _2 }.join
+y = result.select { _1.start_with?("y") }.map { _2 }.join
+z = result.select { _1.start_with?("z") }.map { _2 }.join
 
+puts x.rjust(z.size, " ")
+puts "+".rjust(z.size, " ")
+puts y.rjust(z.size, " ")
+puts "=".rjust(z.size, " ")
+puts z
+
+expected = (x.to_i(2) + y.to_i(2)).to_s(2)
+puts "\nExpected:\n#{expected}"
+puts "Equal:\n#{expected == z}"
+
+puts "\n---\n\n"
+
+puts x.to_i(2)
+puts "+"
+puts y.to_i(2)
+puts "="
+puts z.to_i(2)
+
+expected = (x.to_i(2) + y.to_i(2))
+puts "\nExpected:\n#{expected}"
+puts "Equal:\n#{expected == z.to_i(2)}"
+
+puts "\nPart 2"
+puts "Found by visual inspection"
 puts %w(z09 gbf z30 nbf z05 hdt mht jgt).sort.join(",")
+
 __END__
 x00: 1
 x01: 0
