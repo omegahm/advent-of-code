@@ -22,7 +22,7 @@ input.lines.each do |line|
   steps = line[1..].to_i
 
   steps.times do
-    dial += turn == 'L' ? -1 : 1
+    dial += turn == "L" ? -1 : 1
     dial %= 100
     password2 += 1 if dial.zero?
   end
