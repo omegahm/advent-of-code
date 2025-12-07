@@ -15,22 +15,53 @@ input = <<~INPUT.strip
 ...............
 .^.^.^.^.^...^.
 ...............
+...............
 INPUT
 
 input = DATA.read
 
+require "rmagick"
+@frames = Magick::ImageList.new
+
 map = input.lines.map { _1.chomp.chars }
+img = Magick::Image.new(map[0].size, map.size)
 
 beams = {}
 map.each_with_index do |row, y|
   row.each_with_index do |cell, x|
-    beams[[x, y]] = 1 if cell == "S"
+    case cell
+    when "S"
+      beams[[x, y]] = 1
+      img.pixel_color(x, y, "red")
+    when "^"
+      img.pixel_color(x, y, "red")
+    else
+      img.pixel_color(x, y, "white")
+    end
   end
 end
 
-split_count = 0
+def draw_frame(img, beams)
+  return unless ENV["VISUALIZE"]
 
+  beams.each do |(x, y), _|
+    img.pixel_color(x, y, "green")
+  end
+
+  @frames << img.dup
+end
+
+def make_gif
+  return unless ENV["VISUALIZE"]
+
+  image_name = "07.gif"
+  @frames.write(image_name)
+  `gifsicle --scale=8 --optimize=3 --lossy=200 --delay=1 --loopcount=0 --threads=4 --output=#{image_name} #{image_name}`
+end
+
+split_count = 0
 until beams.keys.any? { |_, y| y >= map.size - 1 }
+  draw_frame(img, beams)
   beams = {}.tap do |new_beams|
     beams.each do |(x, y), t|
       if map[y + 1][x] == "^"
@@ -49,6 +80,7 @@ end
 
 puts "Part 1: #{split_count}"
 puts "Part 2: #{beams.values.sum}"
+make_gif
 
 __END__
 ......................................................................S......................................................................
@@ -192,4 +224,5 @@ __END__
 ..^.^.^...^.^.^.....^.^.^...^...^...^...^.^.^.^.^.^.^.....^.^.^...^.....^.^.^.^.^...^.^...^.^.^.^.^.^.^.^...^.^.^...^.^.^.^.^...^.^.^...^.^..
 .............................................................................................................................................
 .^.^.......^.^.^.^.^.^.^...^.....^.^...^.^.^.^.^.^...^...^.^...^.^.........^.....^.^.^.^.....^.^.^.^.^...^.^.^.^.^.^.^.^.^.^...^...^.^...^.^.
+.............................................................................................................................................
 .............................................................................................................................................
