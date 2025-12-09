@@ -1,3 +1,5 @@
+require_relative "../advent_of_code"
+
 input = <<~INPUT.strip
 Register A: 729
 Register B: 0
@@ -6,9 +8,7 @@ Register C: 0
 Program: 0,1,5,4,3,0
 INPUT
 
-input = DATA.read
-
-registers, program = input.split("\n\n")
+registers, program = @input.split("\n\n")
 registers = registers.split("\n").map { _1.scan(/\d+/)[0].to_i }
 program = program.sub("Program: ", "").split(",").map(&:to_i)
 
@@ -57,8 +57,7 @@ def run(program, registers)
   out
 end
 
-puts "Part 1"
-puts run(program, registers).join(",")
+print_part1 run(program, registers).join(",")
 
 valid = [0]
 (1..program.size).each do |size|
@@ -74,12 +73,4 @@ valid = [0]
   valid = new_valid
 end
 
-puts "Part 2"
-puts valid.min
-
-__END__
-Register A: 46323429
-Register B: 0
-Register C: 0
-
-Program: 2,4,1,1,7,5,1,5,4,3,0,3,5,5,3,0
+print_part2 valid.min

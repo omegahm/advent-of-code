@@ -2,6 +2,7 @@ GEM
   remote: https://gem.coop/
   specs:
     ast (2.4.3)
+    dotenv (3.2.0)
     json (2.16.0)
     language_server-protocol (3.17.0.5)
     lint_roller (1.1.0)
@@ -12,6 +13,7 @@ GEM
     prism (1.6.0)
     racc (1.8.1)
     rainbow (3.1.1)
+    rb_heap (1.1.0)
     regexp_parser (2.11.3)
     rubocop (1.81.7)
       json (~> 2.3)
@@ -37,6 +39,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dotenv
+  rb_heap
   rubocop
 
 BUNDLED WITH

@@ -1,7 +1,8 @@
-input = "125 17"
-input = "510613 358 84 40702 4373582 2 0 1584"
+require_relative "../advent_of_code"
 
-input = input.split(" ").each_with_object({}) { |stone, hash| hash[stone.to_i] = 1 }
+input = "125 17"
+
+input = @input.split(" ").each_with_object({}) { |stone, hash| hash[stone.to_i] = 1 }
 
 def solve(stones, blinks)
   blinks.times do
@@ -26,5 +27,5 @@ def solve(stones, blinks)
   stones.values.sum
 end
 
-puts "Part 1: #{solve(input, 25)}"
-puts "Part 2: #{solve(input, 75)}"
+print_part1 solve(input, 25)
+print_part2 solve(input, 75)

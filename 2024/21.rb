@@ -1,3 +1,5 @@
+require_relative "../advent_of_code"
+
 input = <<~INPUT
 029A
 980A
@@ -5,8 +7,6 @@ input = <<~INPUT
 456A
 379A
 INPUT
-
-input = DATA.read
 
 # +---+---+---+
 # | 7 | 8 | 9 |
@@ -208,7 +208,7 @@ $keypad = {
   },
 }
 
-codes = input.split("\n")
+codes = @input.split("\n")
 $cache = {}
 
 def solve(codes, robots)
@@ -246,15 +246,5 @@ def min_size(code, robots, depth = 0)
   end
 end
 
-puts "Part 1"
-puts solve(codes, 2)
-
-puts "Part 2"
-puts solve(codes, 25)
-
-__END__
-480A
-682A
-140A
-246A
-938A
+print_part1 solve(codes, 2)
+print_part2 solve(codes, 25)
