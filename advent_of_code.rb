@@ -37,15 +37,19 @@ end
 
 # Load the input data
 @input = File.read(File.join(input_directory, "#{day}.txt"))
+@time = [Time.now]
 
 # Show results
 def print_result(part, result)
+  @time.unshift Time.now
+  took = @time.first(2).reduce(:-).to_s
   size = result.size
 
   puts "┏#{"━" * [size + 2, 37].max}┓"
   puts "┃ Part #{part} #{" " * [size - 7, 28].max} ┃"
   puts "┣#{"━" * [size + 2, 37].max}┫"
-  puts "┃ #{result.to_s.rjust(35)} ┃"
+  puts "┃ Result: #{result.to_s.rjust(27)} ┃"
+  puts "┃ Time: #{took.rjust(28)}s ┃"
   puts "┗#{"━" * [size + 2, 37].max}┛"
 end
 
