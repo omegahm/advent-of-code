@@ -4,3 +4,4 @@ gem "rubocop", require: false
 gem "dotenv"
 
 gem "rb_heap"
+gem "z3"
