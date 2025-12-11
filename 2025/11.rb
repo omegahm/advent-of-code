@@ -29,6 +29,32 @@ ggg: out
 hhh: out
 INPUT
 
+if ENV["VISUALIZE"]
+  f = File.open("11.dot", "w")
+  colors = {
+    "svr" => "red",
+    "you" => "blue",
+    "out" => "red",
+    "dac" => "green",
+    "fft" => "green"
+  }
+
+  f.puts "digraph {"
+  colors.each do |node, color|
+    f.puts "  #{node} [style=filled, fillcolor=#{color}];"
+  end
+  @input.split("\n").each do |line|
+    node, edges = line.split(": ")
+    edges.split(" ").each do |edge|
+      f.puts "  #{node} -> #{edge};"
+    end
+  end
+  f.puts "}"
+  f.close
+  system("dot -Tpng 11.dot -o 11.png")
+  system("rm 11.dot")
+end
+
 def parse_input(input)
   {}.tap do |graph|
     input.split("\n").each do |line|
